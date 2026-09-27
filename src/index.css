@@ -16,6 +16,8 @@
       Ubuntu,
       Cantarell,
       sans-serif;
+    background-color: #171717 !important;
+    color: #f5f5f5 !important;
   }
   code,
   pre,
@@ -24,6 +26,128 @@
   }
 }
 
+/* ==========================================
+   إصلاح الـ Inputs والسيرش بار والمودال 100%
+   ========================================== */
+
+/* 1. إجبار حقول الإدخال والسيرش بار والـ Inputs على لون الخلفية الداكن (#171717) */
+input,
+input[type="text"],
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background-color: #171717 !important;
+  background: #171717 !important;
+  color: #f5f5f5 !important;
+  border: 1px solid #2e2e2e !important;
+}
+
+/* عند الضغط أو التركيز على حقل الكتابة */
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: #171717 !important;
+  border-color: #f15827 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #f15827 !important;
+}
+
+/* نص الـ Placeholder الباهت */
+input::placeholder,
+textarea::placeholder {
+  color: #737373 !important;
+}
+
+/* 2. خلفية الهيدر والـ Sidebar والكروت والمودال */
+header,
+nav,
+.bg-white,
+.bg-slate-50,
+.bg-slate-100 {
+  background-color: #212121 !important;
+  color: #f5f5f5 !important;
+}
+
+/* 3. أزرار الفلاتر (Filter Chips) */
+.bg-slate-100\/90 {
+  background-color: #171717 !important;
+  border: 1px solid #2e2e2e !important;
+}
+
+/* زر الفلتر المSelected / النشط فقط ليكون برتقالي */
+.bg-white.text-slate-900 {
+  background-color: #f15827 !important;
+  color: #ffffff !important;
+}
+
+/* 4. أزرار الأكشن الرئيسية (Primary Buttons) */
+button.bg-slate-900,
+button.bg-blue-600,
+.bg-indigo-600 {
+  background-color: #f15827 !important;
+  color: #ffffff !important;
+}
+
+/* 5. أيقونات الإحصائيات العلوية (خلفية داكنة فخمة) */
+.bg-indigo-50,
+.bg-blue-50,
+.bg-amber-50,
+.bg-emerald-50 {
+  background-color: #171717 !important;
+  border: 1px solid #2e2e2e !important;
+}
+
+/* 6. رأس الجدول والـ Hover الداكن المريح */
+thead tr,
+tr.bg-slate-50\/70,
+.bg-slate-50\/70 {
+  background-color: #1a1a1a !important;
+}
+
+tr:hover,
+.hover\:bg-slate-50:hover,
+.hover\:bg-slate-50\/80:hover {
+  background-color: #2a2a2a !important;
+}
+
+/* 7. التأثير عند التمرير على الأزرار الأيقونية الصغيرة */
+button:hover {
+  background-color: #2a2a2a !important;
+}
+
+/* 8. حدود العناصر والجداول (Borders) */
+.border,
+.border-slate-100,
+.border-slate-200,
+.border-slate-200\/80,
+.border-slate-200\/70,
+.divide-slate-100 > * + * {
+  border-color: #2e2e2e !important;
+}
+
+/* 9. درجات الخطوط */
+.text-slate-900,
+.text-slate-800,
+.text-slate-700,
+.text-slate-600 {
+  color: #f5f5f5 !important;
+}
+
+.text-slate-500,
+.text-slate-400 {
+  color: #a3a3a3 !important;
+}
+
+.text-indigo-600,
+.text-blue-600,
+.text-blue-500 {
+  color: #f15827 !important;
+}
+
+/* Print Styles */
 @media print {
   body * {
     visibility: hidden;
@@ -40,5 +164,6 @@
     margin: 0;
     padding: 2rem;
     background: white !important;
+    color: black !important;
   }
 }

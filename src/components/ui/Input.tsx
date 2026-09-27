@@ -18,14 +18,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold text-slate-700 mb-1.5"
+            className="block text-xs font-semibold text-[#f5f5f5] mb-1.5"
           >
             {label}
           </label>
         )}
-        <div className="relative rounded-xl shadow-2xs">
+        <div className="relative rounded-xl">
           {leftElement && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#a3a3a3]">
               {leftElement}
             </div>
           )}
@@ -33,24 +33,24 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={cn(
-              'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:bg-slate-50 disabled:text-slate-500',
+              'block w-full rounded-xl border border-[#2e2e2e] bg-[#171717] px-3.5 py-2 text-sm text-[#f5f5f5] placeholder:text-[#737373] transition-colors focus:border-[#f15827] focus:outline-none focus:ring-1 focus:ring-[#f15827] disabled:bg-[#212121] disabled:text-[#a3a3a3]',
               Boolean(leftElement) && 'pl-10',
               Boolean(rightElement) && 'pr-10',
-              Boolean(error) && 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900',
+              Boolean(error) && 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-400',
               className
             )}
             {...props}
           />
           {rightElement && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#a3a3a3]">
               {rightElement}
             </div>
           )}
         </div>
         {error ? (
-          <p className="mt-1.5 text-xs text-rose-600 font-medium">{error}</p>
+          <p className="mt-1.5 text-xs text-rose-400 font-medium">{error}</p>
         ) : helperText ? (
-          <p className="mt-1.5 text-xs text-slate-500">{helperText}</p>
+          <p className="mt-1.5 text-xs text-[#a3a3a3]">{helperText}</p>
         ) : null}
       </div>
     );
