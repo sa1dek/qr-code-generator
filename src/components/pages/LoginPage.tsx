@@ -1,31 +1,41 @@
-import React, { useState } from 'react';
-import { Radio, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { useToast } from '../ui/Toast';
-import { safeFetchJson } from '../../lib/fetchUtils';
+import React, { useState } from "react";
+import {
+  Radio,
+  Lock,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { useToast } from "../ui/Toast";
+import { safeFetchJson } from "../../lib/fetchUtils";
 
+//--------------|| Component Props Interface ||--------------//
 interface LoginPageProps {
   onLoginSuccess: (token: string, user: any) => void;
   onGoHome: () => void;
-  dbMode: 'supabase' | 'mock';
+  dbMode: "supabase" | "mock";
 }
 
+//--------------|| Login Page Component ||--------------//
 export const LoginPage: React.FC<LoginPageProps> = ({
   onLoginSuccess,
   onGoHome,
   dbMode,
 }) => {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("admin123");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { success, error: toastError } = useToast();
 
+  //--------------|| Form Submission Handler ||--------------//
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setErrorMsg('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      setErrorMsg("يرجى إدخال البريد الإلكتروني وكلمة المرور");
       return;
     }
 
@@ -33,42 +43,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setErrorMsg(null);
 
     try {
-      const { ok, data } = await safeFetchJson('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const { ok, data } = await safeFetchJson("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
       if (!ok || !data?.success) {
-        throw new Error(data?.error || 'فشل تسجيل الدخول');
+        throw new Error(data?.error || "فشل تسجيل الدخول");
       }
 
-      success('تم تسجيل الدخول بنجاح');
+      success("تم تسجيل الدخول بنجاح");
       onLoginSuccess(data.token, data.user);
     } catch (err: any) {
-      setErrorMsg(err.message || 'فشل تسجيل الدخول');
-      toastError(err.message || 'فشل تسجيل الدخول');
+      setErrorMsg(err.message || "فشل تسجيل الدخول");
+      toastError(err.message || "فشل تسجيل الدخول");
     } finally {
       setIsLoading(false);
     }
   };
 
+  //--------------|| Quick Demo Admin Login Handler ||--------------//
   const handleQuickDemoLogin = () => {
-    setEmail('admin@example.com');
-    setPassword('admin123');
+    setEmail("admin@example.com");
+    setPassword("admin123");
     setTimeout(() => {
-      onLoginSuccess('mock_token_' + Date.now(), {
-        email: 'admin@example.com',
-        role: 'admin',
-        name: 'المشرف',
+      onLoginSuccess("mock_token_" + Date.now(), {
+        email: "admin@example.com",
+        role: "admin",
+        name: "المشرف",
       });
-      success('تم الدخول السريع كمسؤول للنظام');
+      success("تم الدخول السريع كمسؤول للنظام");
     }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6" dir="rtl">
-      {/* Top Brand Link */}
+    <div
+      className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6"
+      dir="rtl"
+    >
+      {/*--------------|| Top Brand Header ||--------------*/}
       <div className="mb-6 text-center">
         <button
           type="button"
@@ -79,21 +93,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <Radio className="w-5 h-5" />
           </div>
           <div className="text-right">
-            <h1 className="font-bold text-base text-slate-900">Dynamic Review Cards</h1>
-            <p className="text-[11px] text-slate-500 font-mono">لوحة إدارة الكروت والمراجعات</p>
+            <h1 className="font-bold text-base text-slate-900">
+              Dynamic Review Cards
+            </h1>
+            <p className="text-[11px] text-slate-500 font-mono">
+              لوحة إدارة الكروت والمراجعات
+            </p>
           </div>
         </button>
       </div>
 
-      {/* Login Box */}
+      {/*--------------|| Authentication Card ||--------------*/}
       <div className="w-full max-w-md bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-sm">
         <div className="text-center mb-6">
-          <h2 className="text-xl font-bold text-slate-900">تسجيل الدخول للمسؤول</h2>
+          <h2 className="text-xl font-bold text-slate-900">
+            تسجيل الدخول للمسؤول
+          </h2>
           <p className="text-xs text-slate-500 mt-1">
             أدخل بيانات الدخول للوصول إلى لوحة التحكم وإدارة الكروت
           </p>
         </div>
 
+        {/*--------------|| Error Banner ||--------------*/}
         {errorMsg && (
           <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -101,6 +122,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
         )}
 
+        {/*--------------|| Credentials Form ||--------------*/}
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="البريد الإلكتروني"
@@ -124,16 +146,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             className="dir-ltr text-left"
           />
 
-          <Button type="submit" size="md" className="w-full" isLoading={isLoading}>
+          <Button
+            type="submit"
+            size="md"
+            className="w-full"
+            isLoading={isLoading}
+          >
             تسجيل الدخول
           </Button>
         </form>
 
-        {/* Quick Demo Access */}
+        {/*--------------|| Demo Access & Actions ||--------------*/}
         <div className="mt-6 pt-5 border-t border-slate-100 space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <span>بيانات المشرف التجريبي:</span>
-            <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded">admin@example.com</span>
+            <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded">
+              admin@example.com
+            </span>
           </div>
 
           <Button

@@ -12,12 +12,14 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
+//--------------|| Component Props Interface ||--------------//
 interface HomePageProps {
   onGoToLogin: () => void;
   onGoToDashboard: () => void;
   isAuthenticated: boolean;
 }
 
+//--------------|| Home Page Component ||--------------//
 export const HomePage: React.FC<HomePageProps> = ({
   onGoToLogin,
   onGoToDashboard,
@@ -26,6 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [testCardId, setTestCardId] = useState("CARD-001");
   const { language, setLanguage, t, isRTL } = useLanguage();
 
+  //--------------|| Redirect Handler ||--------------//
   const handleTestRedirect = (e: React.FormEvent) => {
     e.preventDefault();
     if (testCardId.trim()) {
@@ -37,7 +40,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#171717] text-[#f5f5f5] font-sans selection:bg-[#f15827] selection:text-white">
-      {/* Navbar Header */}
+      {/*--------------|| Navbar Header ||--------------*/}
       <header className="border-b border-[#2e2e2e] bg-[#212121] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -54,7 +57,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* Language Toggle & Dashboard Button */}
+          {/*--------------|| Header Controls ||--------------*/}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
@@ -85,8 +88,9 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/*--------------|| Main Content ||--------------*/}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-14 pb-16">
+        {/*--------------|| Hero Section ||--------------*/}
         <div className="text-center max-w-3xl mx-auto space-y-5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#f15827]/10 border border-[#f15827]/30 text-[#f15827] text-xs font-bold">
             <Zap className="w-3.5 h-3.5" />
@@ -122,7 +126,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* Quick Redirect Tester */}
+        {/*--------------|| Quick Redirect Tester ||--------------*/}
         <div className="mt-12 max-w-2xl mx-auto bg-[#212121] border border-[#2e2e2e] rounded-2xl p-5 sm:p-7 shadow-xl">
           <div className="text-center space-y-1.5 mb-5">
             <h2 className="text-base sm:text-lg font-bold text-white flex items-center justify-center gap-2">
@@ -186,7 +190,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* Features Grid */}
+        {/*--------------|| Features Grid ||--------------*/}
         <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="bg-[#212121] border border-[#2e2e2e] p-5 rounded-2xl space-y-2.5">
             <div className="w-10 h-10 rounded-xl bg-[#f15827]/10 text-[#f15827] flex items-center justify-center font-bold">

@@ -5,6 +5,7 @@ import { LoginPage } from "./components/pages/LoginPage";
 import { AdminDashboardPage } from "./components/pages/AdminDashboardPage";
 import { supabase } from "./lib/fetchUtils";
 
+//--------------|| Main Application Root Component ||--------------//
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return window.location.pathname || "/";
@@ -18,7 +19,7 @@ export default function App() {
   const [redirecting, setRedirecting] = useState<boolean>(false);
   const [redirectError, setRedirectError] = useState<string | null>(null);
 
-  // Handle Dynamic QR/NFC Redirect (/r/:cardId)
+  //--------------|| Dynamic QR/NFC Redirect Handler (/r/:cardId) ||--------------//
   useEffect(() => {
     const path = window.location.pathname;
     if (path.startsWith("/r/")) {
@@ -28,7 +29,7 @@ export default function App() {
 
         const handleRedirect = async () => {
           try {
-            // Fetch card details directly from Supabase
+            //--------------|| Fetch Card Details from Supabase ||--------------//
             const { data, error } = await supabase
               .from("cards")
               .select("target_url, is_active, scan_count")
@@ -53,7 +54,7 @@ export default function App() {
               return;
             }
 
-            // Increment scan count
+            //--------------|| Increment Scan Counter ||--------------//
             await supabase
               .from("cards")
               .update({
@@ -62,14 +63,14 @@ export default function App() {
               })
               .eq("card_id", cardId);
 
-            // 🔴 ضمان التوجيه الصحيح حتى لو أرسل المستخدم رابطاً بدون https://
+            //--------------|| Enforce Valid Absolute URL Protocol ||--------------//
             const finalUrl =
               data.target_url.startsWith("http://") ||
               data.target_url.startsWith("https://")
                 ? data.target_url
                 : `https://${data.target_url}`;
 
-            // Instant redirect to Google Review / Target URL
+            //--------------|| Instant Redirect Execution ||--------------//
             window.location.href = finalUrl;
           } catch (err) {
             setRedirectError("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
@@ -82,7 +83,7 @@ export default function App() {
     }
   }, []);
 
-  // Listen to popstate (browser back/forward)
+  //--------------|| History PopState Listener ||--------------//
   useEffect(() => {
     const handlePopState = () => {
       setCurrentPath(window.location.pathname || "/");
@@ -91,6 +92,7 @@ export default function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  //--------------|| Navigation & Authentication Handlers ||--------------//
   const navigateTo = (path: string) => {
     window.history.pushState({}, "", path);
     setCurrentPath(path);
@@ -110,7 +112,7 @@ export default function App() {
 
   const isAuthenticated = Boolean(authToken);
 
-  // If page is handling dynamic scan redirect
+  //--------------|| Render Dynamic Scan Redirect Screen ||--------------//
   if (currentPath.startsWith("/r/")) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4 dir-rtl text-center">
@@ -140,7 +142,7 @@ export default function App() {
     );
   }
 
-  // Router logic
+  //--------------|| Application Route Matching Logic ||--------------//
   let content = null;
 
   if (currentPath.startsWith("/admin/login")) {

@@ -15,11 +15,13 @@ import type { Card, DashboardStats as StatsType } from "../../types/card";
 import { useToast } from "../ui/Toast";
 import { getCardsApi, deleteCardApi } from "../../lib/fetchUtils";
 
+//--------------|| Component Props Interface ||--------------//
 interface AdminDashboardPageProps {
   onLogout: () => void;
   dbMode: "supabase" | "mock";
 }
 
+//--------------|| Admin Dashboard Page Component ||--------------//
 export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onLogout,
   dbMode,
@@ -27,14 +29,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [currentTab, setCurrentTab] = useState<AdminTab>("dashboard");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Data states
+  //--------------|| Data States ||--------------//
   const [cards, setCards] = useState<Card[]>([]);
   const [stats, setStats] = useState<StatsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
-  // Modals states
+  //--------------|| Modal Visibility States ||--------------//
   const [selectedCardForEdit, setSelectedCardForEdit] = useState<Card | null>(
     null,
   );
@@ -48,7 +50,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   const { success, error } = useToast();
 
-  // Load cards and stats directly from Supabase
+  //--------------|| Fetch Data Handler ||--------------//
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -58,7 +60,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         const fetchedCards = res.data.cards;
         setCards(fetchedCards);
 
-        // حساب الإحصائيات مع الحفاظ على التوافق الكامل مع نوع StatsType
+        //--------------|| Calculate Statistics ||--------------//
         const totalCards = fetchedCards.length;
         const activeCards = fetchedCards.filter(
           (c) => c.is_active && c.client_name,
@@ -97,7 +99,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     fetchData();
   }, [fetchData]);
 
-  // Actions
+  //--------------|| Card Deletion Handler ||--------------//
   const handleConfirmDelete = async (cardId: string) => {
     try {
       const res = await deleteCardApi(cardId);
@@ -116,6 +118,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
   };
 
+  //--------------|| Card Update Handler ||--------------//
   const handleCardUpdated = (updatedCard: Card) => {
     setCards((prev) =>
       prev.map((c) => (c.card_id === updatedCard.card_id ? updatedCard : c)),
@@ -123,7 +126,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     fetchData();
   };
 
-  // Filter cards based on search and active tab filter
+  //--------------|| Filter Cards Logic ||--------------//
   const filteredCards = cards.filter((card) => {
     const matchesSearch =
       card.card_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -141,7 +144,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900" dir="rtl">
-      {/* Sidebar Navigation */}
+      {/*--------------|| Sidebar Navigation ||--------------*/}
       <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
@@ -151,9 +154,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         onLogout={onLogout}
       />
 
-      {/* Main Content Area */}
+      {/*--------------|| Main Content Area ||--------------*/}
       <div className="md:mr-64 flex flex-col min-h-screen">
-        {/* Top Navbar */}
+        {/*--------------|| Top Navbar Header ||--------------*/}
         <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -187,9 +190,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </div>
         </header>
 
-        {/* Tab Content */}
+        {/*--------------|| Main Tab Views ||--------------*/}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full">
-          {/* Dashboard Tab: Stats + Table */}
+          {/*--------------|| Dashboard Overview Tab ||--------------*/}
           {currentTab === "dashboard" && (
             <div className="space-y-6">
               <DashboardStats stats={stats} isLoading={isLoading} />
@@ -219,7 +222,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
           )}
 
-          {/* Cards Tab: Dedicated Cards Manager */}
+          {/*--------------|| Dedicated Cards Manager Tab ||--------------*/}
           {currentTab === "cards" && (
             <div className="space-y-4">
               <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -258,7 +261,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
           )}
 
-          {/* Analytics Tab */}
+          {/*--------------|| Scan Analytics Tab ||--------------*/}
           {currentTab === "analytics" && (
             <AnalyticsView
               cards={cards}
@@ -268,12 +271,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             />
           )}
 
-          {/* Docs Tab */}
+          {/*--------------|| Documentation Guide Tab ||--------------*/}
           {currentTab === "docs" && <DocsView />}
         </main>
       </div>
 
-      {/* Modals */}
+      {/*--------------|| Application Modals ||--------------*/}
       <AssignCardModal
         card={selectedCardForEdit}
         isOpen={Boolean(selectedCardForEdit)}

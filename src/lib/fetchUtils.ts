@@ -1,6 +1,7 @@
 import { supabase } from "./supabase/client";
 export { supabase };
 
+//--------------|| Safe JSON Request Helper ||--------------//
 export async function safeFetchJson<T = any>(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -39,7 +40,7 @@ export async function safeFetchJson<T = any>(
   };
 }
 
-// 1. دالة جلب قائمة الكروت للداشبورد من Supabase
+//--------------|| Fetch All Cards ||--------------//
 export async function getCardsApi() {
   const { data, error } = await supabase
     .from("cards")
@@ -57,7 +58,7 @@ export async function getCardsApi() {
   return { ok: true, status: 200, data: { success: true, cards: data || [] } };
 }
 
-// 2. دالة إنشاء كارت فردي عبر Supabase مباشرة
+//--------------|| Create Single Card ||--------------//
 export async function createCardApi(cardId: string) {
   const { data, error } = await supabase
     .from("cards")
@@ -76,7 +77,7 @@ export async function createCardApi(cardId: string) {
   return { ok: true, status: 200, data: { success: true, card: data } };
 }
 
-// 3. دالة توليد كروت كميات (Bulk Generate)
+//--------------|| Bulk Create Cards ||--------------//
 export async function createBulkCardsApi(startId: string, endId: string) {
   const startNum = parseInt(startId.replace(/\D/g, ""), 10);
   const endNum = parseInt(endId.replace(/\D/g, ""), 10);
@@ -112,7 +113,7 @@ export async function createBulkCardsApi(startId: string, endId: string) {
   return { ok: true, status: 200, data: { success: true, createdCards: data } };
 }
 
-// 4. دالة تحديث كارت
+//--------------|| Update Card Details ||--------------//
 export async function updateCardApi(
   cardId: string,
   updates: Partial<{
@@ -139,7 +140,7 @@ export async function updateCardApi(
   return { ok: true, status: 200, data: { success: true, card: data } };
 }
 
-// 5. دالة حذف كارت من Supabase
+//--------------|| Delete Card ||--------------//
 export async function deleteCardApi(cardId: string) {
   const { error } = await supabase.from("cards").delete().eq("card_id", cardId);
 

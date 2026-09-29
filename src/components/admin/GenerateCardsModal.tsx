@@ -8,12 +8,14 @@ import { useToast } from "../ui/Toast";
 import { type BulkGenerateResult } from "../../types/card";
 import { createCardApi, createBulkCardsApi } from "../../lib/fetchUtils";
 
+//--------------|| Component Props Interface ||--------------//
 interface GenerateCardsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
+//--------------|| Generate Cards Modal Component ||--------------//
 export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
   isOpen,
   onClose,
@@ -28,12 +30,14 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
   const [bulkResult, setBulkResult] = useState<BulkGenerateResult | null>(null);
   const { success, error: toastError } = useToast();
 
+  //--------------|| Reset Form State ||--------------//
   const handleReset = () => {
     setSingleId("");
     setErrorMsg(null);
     setBulkResult(null);
   };
 
+  //--------------|| Single Card Generation Submission ||--------------//
   const handleSingleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const val = validateCardId(singleId);
@@ -64,6 +68,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
     }
   };
 
+  //--------------|| Bulk Cards Generation Submission ||--------------//
   const handleBulkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = parseCardRange(startId, endId);
@@ -117,7 +122,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
       maxWidth="md"
     >
       <div className="space-y-4 pt-1" dir="rtl">
-        {/* Mode Switcher */}
+        {/*--------------|| Mode Switcher Controls ||--------------*/}
         <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl">
           <button
             type="button"
@@ -154,14 +159,14 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
           </button>
         </div>
 
-        {/* Error banner */}
+        {/*--------------|| Error Notification Banner ||--------------*/}
         {errorMsg && (
           <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl">
             {errorMsg}
           </div>
         )}
 
-        {/* Single Card Form */}
+        {/*--------------|| Single Card Mode Form ||--------------*/}
         {mode === "single" && (
           <form onSubmit={handleSingleSubmit} className="space-y-4">
             <Input
@@ -204,7 +209,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
           </form>
         )}
 
-        {/* Bulk Generate Form */}
+        {/*--------------|| Bulk Generation Mode Form ||--------------*/}
         {mode === "bulk" && (
           <form onSubmit={handleBulkSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -234,14 +239,14 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
               <p className="font-semibold text-slate-800">
                 قواعد التوليد التلقائي:
               </p>
-              <p>• ينشئ الكروت بالترتيب التسلسلي من البداية إلى النهاية.</p>
+              <p>ينشئ الكروت بالترتيب التسلسلي من البداية إلى النهاية.</p>
               <p>
                 • في حال وجود معرفات مكررة، يتم تخطيها تلقائياً وإكمال الباقي
                 دون توقف.
               </p>
             </div>
 
-            {/* Bulk Result Feedback */}
+            {/*--------------|| Bulk Action Results Feedback ||--------------*/}
             {bulkResult && (
               <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl space-y-1">
                 <p className="font-bold text-sm">

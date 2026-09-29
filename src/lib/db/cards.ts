@@ -1,44 +1,50 @@
-import { Card, CardScan, DashboardStats, BulkGenerateResult } from '../../types/card';
-import { createAdminClient } from '../supabase/admin';
-import { createServerClient } from '../supabase/server';
+import {
+  Card,
+  CardScan,
+  DashboardStats,
+  BulkGenerateResult,
+} from "../../types/card";
+import { createAdminClient } from "../supabase/admin";
+import { createServerClient } from "../supabase/server";
 
-// -------------------------------------------------------------
-// Initial Mock Seed Data
-// -------------------------------------------------------------
+//--------------|| Initial Mock Seed Data ||--------------//
 const INITIAL_MOCK_CARDS: Card[] = [
   {
-    id: 'c1111111-0000-0000-0000-000000000001',
-    card_id: 'CARD-001',
-    client_name: 'مطعم المدينة للمأكولات الشرقية',
-    target_url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',
+    id: "c1111111-0000-0000-0000-000000000001",
+    card_id: "CARD-001",
+    client_name: "مطعم المدينة للمأكولات الشرقية",
+    target_url:
+      "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
     is_active: true,
     scan_count: 142,
     created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
     updated_at: new Date(Date.now() - 2 * 86400000).toISOString(),
   },
   {
-    id: 'c1111111-0000-0000-0000-000000000002',
-    card_id: 'CARD-002',
-    client_name: 'مقهى الأندلس الفاخر',
-    target_url: 'https://search.google.com/local/writereview?placeid=ChIJs_5N0_k900gR7wXgX123456',
+    id: "c1111111-0000-0000-0000-000000000002",
+    card_id: "CARD-002",
+    client_name: "مقهى الأندلس الفاخر",
+    target_url:
+      "https://search.google.com/local/writereview?placeid=ChIJs_5N0_k900gR7wXgX123456",
     is_active: true,
     scan_count: 89,
     created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
     updated_at: new Date(Date.now() - 5 * 86400000).toISOString(),
   },
   {
-    id: 'c1111111-0000-0000-0000-000000000003',
-    card_id: 'CARD-003',
-    client_name: 'عيادات النخبة لطب الأسنان',
-    target_url: 'https://search.google.com/local/writereview?placeid=ChIJde_clinic_sample_place_id',
+    id: "c1111111-0000-0000-0000-000000000003",
+    card_id: "CARD-003",
+    client_name: "عيادات النخبة لطب الأسنان",
+    target_url:
+      "https://search.google.com/local/writereview?placeid=ChIJde_clinic_sample_place_id",
     is_active: true,
     scan_count: 45,
     created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
     updated_at: new Date(Date.now() - 1 * 86400000).toISOString(),
   },
   {
-    id: 'c1111111-0000-0000-0000-000000000004',
-    card_id: 'CARD-004',
+    id: "c1111111-0000-0000-0000-000000000004",
+    card_id: "CARD-004",
     client_name: null,
     target_url: null,
     is_active: false,
@@ -47,8 +53,8 @@ const INITIAL_MOCK_CARDS: Card[] = [
     updated_at: new Date(Date.now() - 5 * 86400000).toISOString(),
   },
   {
-    id: 'c1111111-0000-0000-0000-000000000005',
-    card_id: 'CARD-005',
+    id: "c1111111-0000-0000-0000-000000000005",
+    card_id: "CARD-005",
     client_name: null,
     target_url: null,
     is_active: false,
@@ -60,90 +66,105 @@ const INITIAL_MOCK_CARDS: Card[] = [
 
 const INITIAL_MOCK_SCANS: CardScan[] = [
   {
-    id: 'scan-1',
-    card_id: 'CARD-001',
+    id: "scan-1",
+    card_id: "CARD-001",
     scanned_at: new Date(Date.now() - 20 * 60000).toISOString(),
-    user_agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
-    referer: 'NFC Tag',
-    ip_hash: 'ip_938ab4c1',
+    user_agent:
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+    referer: "NFC Tag",
+    ip_hash: "ip_938ab4c1",
   },
   {
-    id: 'scan-2',
-    card_id: 'CARD-001',
+    id: "scan-2",
+    card_id: "CARD-001",
     scanned_at: new Date(Date.now() - 50 * 60000).toISOString(),
-    user_agent: 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36',
-    referer: 'QR Code',
-    ip_hash: 'ip_44a1b023',
+    user_agent:
+      "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36",
+    referer: "QR Code",
+    ip_hash: "ip_44a1b023",
   },
   {
-    id: 'scan-3',
-    card_id: 'CARD-002',
+    id: "scan-3",
+    card_id: "CARD-002",
     scanned_at: new Date(Date.now() - 3 * 3600000).toISOString(),
-    user_agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) Mobile',
-    referer: 'NFC Tag',
-    ip_hash: 'ip_11ef8821',
+    user_agent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) Mobile",
+    referer: "NFC Tag",
+    ip_hash: "ip_11ef8821",
   },
   {
-    id: 'scan-4',
-    card_id: 'CARD-003',
+    id: "scan-4",
+    card_id: "CARD-003",
     scanned_at: new Date(Date.now() - 8 * 3600000).toISOString(),
-    user_agent: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) Chrome/119.0',
-    referer: 'QR Code',
-    ip_hash: 'ip_99fa1233',
+    user_agent: "Mozilla/5.0 (Linux; Android 13; Pixel 7) Chrome/119.0",
+    referer: "QR Code",
+    ip_hash: "ip_99fa1233",
   },
 ];
 
-// In-Memory store for quick testing when Supabase credentials are not supplied
+//--------------|| In-Memory Mock Store ||--------------//
 let mockCardsStore: Card[] = [...INITIAL_MOCK_CARDS];
 let mockScansStore: CardScan[] = [...INITIAL_MOCK_SCANS];
 
-export function getDatabaseMode(): 'supabase' | 'mock' {
+//--------------|| Database Mode Resolver ||--------------//
+export function getDatabaseMode(): "supabase" | "mock" {
   const adminClient = createAdminClient() || createServerClient();
-  return adminClient ? 'supabase' : 'mock';
+  return adminClient ? "supabase" : "mock";
 }
 
-// -------------------------------------------------------------
-// Database Operations
-// -------------------------------------------------------------
-
-export async function getAllCards(search?: string, filter?: string): Promise<Card[]> {
+//--------------|| Get All Cards with Filtering ||--------------//
+export async function getAllCards(
+  search?: string,
+  filter?: string,
+): Promise<Card[]> {
   const client = createAdminClient() || createServerClient();
 
   if (client) {
     try {
-      let query = client.from('cards').select('*').order('created_at', { ascending: false });
+      let query = client
+        .from("cards")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (filter === 'active') {
-        query = query.eq('is_active', true).not('target_url', 'is', null);
-      } else if (filter === 'unassigned') {
-        query = query.or('target_url.is.null,target_url.eq.');
-      } else if (filter === 'inactive') {
-        query = query.eq('is_active', false);
+      if (filter === "active") {
+        query = query.eq("is_active", true).not("target_url", "is", null);
+      } else if (filter === "unassigned") {
+        query = query.or("target_url.is.null,target_url.eq.");
+      } else if (filter === "inactive") {
+        query = query.eq("is_active", false);
       }
 
       if (search) {
-        query = query.or(`card_id.ilike.%${search}%,client_name.ilike.%${search}%`);
+        query = query.or(
+          `card_id.ilike.%${search}%,client_name.ilike.%${search}%`,
+        );
       }
 
       const { data, error } = await query;
       if (error) {
-        console.warn('Supabase getAllCards error, falling back to mock:', error.message);
+        console.warn(
+          "Supabase getAllCards error, falling back to mock:",
+          error.message,
+        );
       } else if (data) {
         return data as Card[];
       }
     } catch (err) {
-      console.warn('Supabase query failed:', err);
+      console.warn("Supabase query failed:", err);
     }
   }
 
   // Mock DB fallback
   let list = [...mockCardsStore];
 
-  if (filter === 'active') {
-    list = list.filter((c) => c.is_active && c.target_url && c.target_url.trim().length > 0);
-  } else if (filter === 'unassigned') {
-    list = list.filter((c) => !c.target_url || c.target_url.trim().length === 0);
-  } else if (filter === 'inactive') {
+  if (filter === "active") {
+    list = list.filter(
+      (c) => c.is_active && c.target_url && c.target_url.trim().length > 0,
+    );
+  } else if (filter === "unassigned") {
+    list = list.filter(
+      (c) => !c.target_url || c.target_url.trim().length === 0,
+    );
+  } else if (filter === "inactive") {
     list = list.filter((c) => !c.is_active);
   }
 
@@ -152,14 +173,17 @@ export async function getAllCards(search?: string, filter?: string): Promise<Car
     list = list.filter(
       (c) =>
         c.card_id.toLowerCase().includes(s) ||
-        (c.client_name && c.client_name.toLowerCase().includes(s))
+        (c.client_name && c.client_name.toLowerCase().includes(s)),
     );
   }
 
-  // Sort by card_id or created_at desc
-  return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  return list.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 }
 
+//--------------|| Get Card By ID ||--------------//
 export async function getCardById(cardId: string): Promise<Card | null> {
   const normalizedId = cardId.trim().toUpperCase();
   const client = createAdminClient() || createServerClient();
@@ -167,31 +191,36 @@ export async function getCardById(cardId: string): Promise<Card | null> {
   if (client) {
     try {
       const { data, error } = await client
-        .from('cards')
-        .select('*')
-        .eq('card_id', normalizedId)
+        .from("cards")
+        .select("*")
+        .eq("card_id", normalizedId)
         .maybeSingle();
 
       if (!error && data) {
         return data as Card;
       }
     } catch (err) {
-      console.warn('Supabase getCardById failed:', err);
+      console.warn("Supabase getCardById failed:", err);
     }
   }
 
-  const found = mockCardsStore.find((c) => c.card_id.toUpperCase() === normalizedId);
+  const found = mockCardsStore.find(
+    (c) => c.card_id.toUpperCase() === normalizedId,
+  );
   return found || null;
 }
 
-export async function createSingleCard(cardId: string): Promise<{ success: boolean; card?: Card; error?: string }> {
+//--------------|| Create Single Card ||--------------//
+export async function createSingleCard(
+  cardId: string,
+): Promise<{ success: boolean; card?: Card; error?: string }> {
   const normalizedId = cardId.trim().toUpperCase();
   const client = createAdminClient();
 
   if (client) {
     try {
       const { data, error } = await client
-        .from('cards')
+        .from("cards")
         .insert({
           card_id: normalizedId,
           client_name: null,
@@ -203,21 +232,29 @@ export async function createSingleCard(cardId: string): Promise<{ success: boole
         .single();
 
       if (error) {
-        if (error.code === '23505') {
-          return { success: false, error: 'معرف الكارت موجود بالفعل (Duplicate Card ID)' };
+        if (error.code === "23505") {
+          return {
+            success: false,
+            error: "معرف الكارت موجود بالفعل (Duplicate Card ID)",
+          };
         }
         return { success: false, error: error.message };
       }
       return { success: true, card: data as Card };
     } catch (err: any) {
-      return { success: false, error: err.message || 'خطأ في إنشاء الكارت' };
+      return { success: false, error: err.message || "خطأ في إنشاء الكارت" };
     }
   }
 
   // Mock
-  const exists = mockCardsStore.some((c) => c.card_id.toUpperCase() === normalizedId);
+  const exists = mockCardsStore.some(
+    (c) => c.card_id.toUpperCase() === normalizedId,
+  );
   if (exists) {
-    return { success: false, error: 'معرف الكارت موجود بالفعل (Duplicate Card ID)' };
+    return {
+      success: false,
+      error: "معرف الكارت موجود بالفعل (Duplicate Card ID)",
+    };
   }
 
   const newCard: Card = {
@@ -235,19 +272,27 @@ export async function createSingleCard(cardId: string): Promise<{ success: boole
   return { success: true, card: newCard };
 }
 
-export async function createBulkCards(cardIds: string[]): Promise<BulkGenerateResult> {
+//--------------|| Create Bulk Cards ||--------------//
+export async function createBulkCards(
+  cardIds: string[],
+): Promise<BulkGenerateResult> {
   const client = createAdminClient();
-  const distinctIds = Array.from(new Set(cardIds.map((id) => id.trim().toUpperCase())));
+  const distinctIds = Array.from(
+    new Set(cardIds.map((id) => id.trim().toUpperCase())),
+  );
 
   if (client) {
     try {
-      // Find existing
       const { data: existing } = await client
-        .from('cards')
-        .select('card_id')
-        .in('card_id', distinctIds);
+        .from("cards")
+        .select("card_id")
+        .in("card_id", distinctIds);
 
-      const existingSet = new Set((existing || []).map((e: { card_id: string }) => e.card_id.toUpperCase()));
+      const existingSet = new Set(
+        (existing || []).map((e: { card_id: string }) =>
+          e.card_id.toUpperCase(),
+        ),
+      );
       const toInsertIds = distinctIds.filter((id) => !existingSet.has(id));
       const skippedIds = distinctIds.filter((id) => existingSet.has(id));
 
@@ -269,7 +314,7 @@ export async function createBulkCards(cardIds: string[]): Promise<BulkGenerateRe
       }));
 
       const { data: inserted, error } = await client
-        .from('cards')
+        .from("cards")
         .insert(rows)
         .select();
 
@@ -284,7 +329,7 @@ export async function createBulkCards(cardIds: string[]): Promise<BulkGenerateRe
         skippedCardIds: skippedIds,
       };
     } catch (err) {
-      console.warn('Supabase bulk create failed, falling back to mock:', err);
+      console.warn("Supabase bulk create failed, falling back to mock:", err);
     }
   }
 
@@ -320,9 +365,10 @@ export async function createBulkCards(cardIds: string[]): Promise<BulkGenerateRe
   };
 }
 
+//--------------|| Update Card Details ||--------------//
 export async function updateCard(
   cardId: string,
-  updates: Partial<Pick<Card, 'client_name' | 'target_url' | 'is_active'>>
+  updates: Partial<Pick<Card, "client_name" | "target_url" | "is_active">>,
 ): Promise<{ success: boolean; card?: Card; error?: string }> {
   const normalizedId = cardId.trim().toUpperCase();
   const client = createAdminClient();
@@ -333,14 +379,17 @@ export async function updateCard(
         updated_at: new Date().toISOString(),
       };
 
-      if (updates.client_name !== undefined) payload.client_name = updates.client_name;
-      if (updates.target_url !== undefined) payload.target_url = updates.target_url;
-      if (updates.is_active !== undefined) payload.is_active = updates.is_active;
+      if (updates.client_name !== undefined)
+        payload.client_name = updates.client_name;
+      if (updates.target_url !== undefined)
+        payload.target_url = updates.target_url;
+      if (updates.is_active !== undefined)
+        payload.is_active = updates.is_active;
 
       const { data, error } = await client
-        .from('cards')
+        .from("cards")
         .update(payload)
-        .eq('card_id', normalizedId)
+        .eq("card_id", normalizedId)
         .select()
         .single();
 
@@ -354,17 +403,26 @@ export async function updateCard(
   }
 
   // Mock
-  const index = mockCardsStore.findIndex((c) => c.card_id.toUpperCase() === normalizedId);
+  const index = mockCardsStore.findIndex(
+    (c) => c.card_id.toUpperCase() === normalizedId,
+  );
   if (index === -1) {
-    return { success: false, error: 'الكارت غير موجود' };
+    return { success: false, error: "الكارت غير موجود" };
   }
 
   const existing = mockCardsStore[index];
   const updated: Card = {
     ...existing,
-    client_name: updates.client_name !== undefined ? updates.client_name : existing.client_name,
-    target_url: updates.target_url !== undefined ? updates.target_url : existing.target_url,
-    is_active: updates.is_active !== undefined ? updates.is_active : existing.is_active,
+    client_name:
+      updates.client_name !== undefined
+        ? updates.client_name
+        : existing.client_name,
+    target_url:
+      updates.target_url !== undefined
+        ? updates.target_url
+        : existing.target_url,
+    is_active:
+      updates.is_active !== undefined ? updates.is_active : existing.is_active,
     updated_at: new Date().toISOString(),
   };
 
@@ -372,13 +430,19 @@ export async function updateCard(
   return { success: true, card: updated };
 }
 
-export async function deleteCard(cardId: string): Promise<{ success: boolean; error?: string }> {
+//--------------|| Delete Card ||--------------//
+export async function deleteCard(
+  cardId: string,
+): Promise<{ success: boolean; error?: string }> {
   const normalizedId = cardId.trim().toUpperCase();
   const client = createAdminClient();
 
   if (client) {
     try {
-      const { error } = await client.from('cards').delete().eq('card_id', normalizedId);
+      const { error } = await client
+        .from("cards")
+        .delete()
+        .eq("card_id", normalizedId);
       if (error) return { success: false, error: error.message };
       return { success: true };
     } catch (err: any) {
@@ -388,18 +452,23 @@ export async function deleteCard(cardId: string): Promise<{ success: boolean; er
 
   // Mock
   const initialLen = mockCardsStore.length;
-  mockCardsStore = mockCardsStore.filter((c) => c.card_id.toUpperCase() !== normalizedId);
-  mockScansStore = mockScansStore.filter((s) => s.card_id.toUpperCase() !== normalizedId);
+  mockCardsStore = mockCardsStore.filter(
+    (c) => c.card_id.toUpperCase() !== normalizedId,
+  );
+  mockScansStore = mockScansStore.filter(
+    (s) => s.card_id.toUpperCase() !== normalizedId,
+  );
 
   if (mockCardsStore.length === initialLen) {
-    return { success: false, error: 'الكارت غير موجود' };
+    return { success: false, error: "الكارت غير موجود" };
   }
   return { success: true };
 }
 
+//--------------|| Record Card Scan ||--------------//
 export async function recordCardScan(
   cardId: string,
-  metadata?: { userAgent?: string; referer?: string; ipHash?: string }
+  metadata?: { userAgent?: string; referer?: string; ipHash?: string },
 ): Promise<void> {
   const normalizedId = cardId.trim().toUpperCase();
   const client = createAdminClient();
@@ -407,7 +476,7 @@ export async function recordCardScan(
   if (client) {
     try {
       // 1. Insert scan row
-      await client.from('card_scans').insert({
+      await client.from("card_scans").insert({
         card_id: normalizedId,
         user_agent: metadata?.userAgent || null,
         referer: metadata?.referer || null,
@@ -416,27 +485,30 @@ export async function recordCardScan(
 
       // 2. Increment scan_count
       const { data: card } = await client
-        .from('cards')
-        .select('scan_count')
-        .eq('card_id', normalizedId)
+        .from("cards")
+        .select("scan_count")
+        .eq("card_id", normalizedId)
         .single();
 
       if (card) {
         await client
-          .from('cards')
+          .from("cards")
           .update({ scan_count: (card.scan_count || 0) + 1 })
-          .eq('card_id', normalizedId);
+          .eq("card_id", normalizedId);
       }
       return;
     } catch (err) {
-      console.warn('Failed recording scan in Supabase:', err);
+      console.warn("Failed recording scan in Supabase:", err);
     }
   }
 
   // Mock
-  const cardIndex = mockCardsStore.findIndex((c) => c.card_id.toUpperCase() === normalizedId);
+  const cardIndex = mockCardsStore.findIndex(
+    (c) => c.card_id.toUpperCase() === normalizedId,
+  );
   if (cardIndex !== -1) {
-    mockCardsStore[cardIndex].scan_count = (mockCardsStore[cardIndex].scan_count || 0) + 1;
+    mockCardsStore[cardIndex].scan_count =
+      (mockCardsStore[cardIndex].scan_count || 0) + 1;
   }
 
   mockScansStore.unshift({
@@ -449,6 +521,7 @@ export async function recordCardScan(
   });
 }
 
+//--------------|| Get Dashboard Stats ||--------------//
 export async function getDashboardStats(): Promise<DashboardStats> {
   const cards = await getAllCards();
   const client = createAdminClient() || createServerClient();
@@ -458,9 +531,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   if (client) {
     try {
       const { data } = await client
-        .from('card_scans')
-        .select('*')
-        .order('scanned_at', { ascending: false })
+        .from("card_scans")
+        .select("*")
+        .order("scanned_at", { ascending: false })
         .limit(10);
       if (data) {
         recentScans = data as CardScan[];

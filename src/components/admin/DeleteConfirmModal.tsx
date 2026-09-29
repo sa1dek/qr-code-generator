@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Trash2, AlertTriangle } from 'lucide-react';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import type{ Card } from '../../types/card';
+import React, { useState } from "react";
+import { Trash2, AlertTriangle } from "lucide-react";
+import { Modal } from "../ui/Modal";
+import { Button } from "../ui/Button";
+import type { Card } from "../../types/card";
 
+//--------------|| Component Props Interface ||--------------//
 interface DeleteConfirmModalProps {
   card: Card | null;
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface DeleteConfirmModalProps {
   onConfirm: (cardId: string) => Promise<void> | void;
 }
 
+//--------------|| Delete Confirmation Modal Component ||--------------//
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   card,
   isOpen,
@@ -21,6 +23,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
   if (!card) return null;
 
+  //--------------|| Delete Handler ||--------------//
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -39,18 +42,22 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       maxWidth="sm"
     >
       <div className="space-y-4 pt-1 text-right" dir="rtl">
+        {/*--------------|| Warning Banner ||--------------*/}
         <div className="flex items-center gap-3 p-3.5 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-900">
           <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center shrink-0 text-rose-600">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div className="text-xs">
-            <span className="font-bold text-rose-950 block text-sm">إجراء لا يمكن التراجع عنه</span>
+            <span className="font-bold text-rose-950 block text-sm">
+              إجراء لا يمكن التراجع عنه
+            </span>
             <span className="text-rose-700 mt-0.5 block">
               سيتم حذف الكارت وإلغاء توجيهه وإزالة سجل المسحات المرتبط به.
             </span>
           </div>
         </div>
 
+        {/*--------------|| Card Summary Details ||--------------*/}
         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-slate-500">معرف الكارت:</span>
@@ -62,16 +69,21 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           {card.client_name && (
             <div className="flex items-center justify-between">
               <span className="text-slate-500">العميل المخصص:</span>
-              <span className="font-medium text-slate-800">{card.client_name}</span>
+              <span className="font-medium text-slate-800">
+                {card.client_name}
+              </span>
             </div>
           )}
 
           <div className="flex items-center justify-between">
             <span className="text-slate-500">إجمالي المسحات:</span>
-            <span className="font-mono text-slate-800">{card.scan_count || 0} مسحة</span>
+            <span className="font-mono text-slate-800">
+              {card.scan_count || 0} مسحة
+            </span>
           </div>
         </div>
 
+        {/*--------------|| Modal Actions ||--------------*/}
         <div className="flex items-center justify-end gap-2 pt-2">
           <Button
             type="button"

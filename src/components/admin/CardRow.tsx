@@ -15,6 +15,7 @@ import { Card, getCardStatus, CardStatus } from "../../types/card";
 import { getShortCardUrl } from "../../lib/utils";
 import { useToast } from "../ui/Toast";
 
+//--------------|| Component Props Interface ||--------------//
 interface CardRowProps {
   card: Card;
   onEdit: (card: Card) => void;
@@ -23,6 +24,7 @@ interface CardRowProps {
   onSimulateScan: (card: Card) => void;
 }
 
+//--------------|| Card Row Component ||--------------//
 export const CardRow: React.FC<CardRowProps> = ({
   card,
   onEdit,
@@ -36,6 +38,7 @@ export const CardRow: React.FC<CardRowProps> = ({
   const status: CardStatus = getCardStatus(card);
   const shortUrl = getShortCardUrl(card.card_id);
 
+  //--------------|| Copy Link Handler ||--------------//
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(shortUrl);
@@ -44,6 +47,7 @@ export const CardRow: React.FC<CardRowProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  //--------------|| Delete Handler ||--------------//
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(card);
@@ -51,7 +55,7 @@ export const CardRow: React.FC<CardRowProps> = ({
 
   return (
     <tr className="hover:bg-slate-50/80 transition-colors border-b border-slate-200/70 text-right group">
-      {/* 1. Card ID & Short Link */}
+      {/*--------------|| Card ID & Short Link ||--------------*/}
       <td className="py-4 px-4 align-middle">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -84,7 +88,7 @@ export const CardRow: React.FC<CardRowProps> = ({
         </div>
       </td>
 
-      {/* 2. Status Badge */}
+      {/*--------------|| Status Badge ||--------------*/}
       <td className="py-4 px-4 align-middle">
         {status === "active" && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -106,7 +110,7 @@ export const CardRow: React.FC<CardRowProps> = ({
         )}
       </td>
 
-      {/* 3. Client Name */}
+      {/*--------------|| Client Name ||--------------*/}
       <td className="py-4 px-4 align-middle font-medium text-sm text-slate-800">
         {card.client_name ? (
           <span>{card.client_name}</span>
@@ -117,7 +121,7 @@ export const CardRow: React.FC<CardRowProps> = ({
         )}
       </td>
 
-      {/* 4. Target URL / Google Review Link */}
+      {/*--------------|| Target URL / Google Review Link ||--------------*/}
       <td className="py-4 px-4 align-middle max-w-[220px]">
         {card.target_url ? (
           <div className="flex items-center gap-1.5">
@@ -142,17 +146,17 @@ export const CardRow: React.FC<CardRowProps> = ({
         )}
       </td>
 
-      {/* 5. Scan Count */}
+      {/*--------------|| Scan Count ||--------------*/}
       <td className="py-4 px-4 align-middle text-center">
         <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 font-mono text-xs font-semibold text-slate-800">
           {(card.scan_count || 0).toLocaleString()}
         </span>
       </td>
 
-      {/* 6. Actions */}
+      {/*--------------|| Row Actions ||--------------*/}
       <td className="py-4 px-4 align-middle text-left">
         <div className="flex items-center justify-end gap-1">
-          {/* Quick scan simulator */}
+          {/* Scan Simulator */}
           <button
             type="button"
             onClick={() => onSimulateScan(card)}
@@ -162,7 +166,7 @@ export const CardRow: React.FC<CardRowProps> = ({
             <Eye className="w-4 h-4" />
           </button>
 
-          {/* QR Code */}
+          {/* QR Code Modal Trigger */}
           <button
             type="button"
             onClick={() => onShowQR(card)}
@@ -172,7 +176,7 @@ export const CardRow: React.FC<CardRowProps> = ({
             <QrCode className="w-4 h-4" />
           </button>
 
-          {/* Edit / Assign */}
+          {/* Edit / Assign Modal Trigger */}
           <button
             type="button"
             onClick={() => onEdit(card)}
@@ -182,7 +186,7 @@ export const CardRow: React.FC<CardRowProps> = ({
             <Edit2 className="w-4 h-4" />
           </button>
 
-          {/* Delete */}
+          {/* Delete Trigger */}
           <button
             type="button"
             onClick={handleDeleteClick}

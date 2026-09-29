@@ -18,6 +18,7 @@ import { Input } from "../ui/Input";
 import { getShortCardUrl } from "../../lib/utils";
 import { useToast } from "../ui/Toast";
 
+//--------------|| Component Props Interface ||--------------//
 interface CardsTableProps {
   cards: Card[];
   isLoading: boolean;
@@ -33,6 +34,7 @@ interface CardsTableProps {
   onRefresh: () => void;
 }
 
+//--------------|| Cards Table Component ||--------------//
 export const CardsTable: React.FC<CardsTableProps> = ({
   cards,
   isLoading,
@@ -50,6 +52,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
   const { success } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  //--------------|| Filter Options ||--------------//
   const filters = [
     { id: "all", label: "الكل" },
     { id: "active", label: "المفعلة" },
@@ -57,6 +60,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
     { id: "inactive", label: "معطلة" },
   ];
 
+  //--------------|| Copy Link Handler ||--------------//
   const handleCopyLink = (cardId: string) => {
     navigator.clipboard.writeText(getShortCardUrl(cardId));
     setCopiedId(cardId);
@@ -69,9 +73,9 @@ export const CardsTable: React.FC<CardsTableProps> = ({
       className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden"
       dir="rtl"
     >
-      {/* Table Toolbar Header */}
+      {/*--------------|| Table Toolbar Header ||--------------*/}
       <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Search Input */}
+        {/*--------------|| Search Input ||--------------*/}
         <div className="w-full md:w-80">
           <Input
             placeholder="بحث بمعرف الكارت أو اسم العميل..."
@@ -82,9 +86,9 @@ export const CardsTable: React.FC<CardsTableProps> = ({
           />
         </div>
 
-        {/* Filters and Actions */}
+        {/*--------------|| Filters & Action Buttons ||--------------*/}
         <div className="flex flex-wrap items-center justify-between md:justify-end gap-2">
-          {/* Filter Chips */}
+          {/*--------------|| Filter Chips ||--------------*/}
           <div className="inline-flex items-center gap-1 p-1 bg-slate-100/90 rounded-xl">
             {filters.map((f) => (
               <button
@@ -126,7 +130,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
         </div>
       </div>
 
-      {/* Desktop Table View */}
+      {/*--------------|| Desktop Table View ||--------------*/}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-right border-collapse">
           <thead>
@@ -187,7 +191,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
         </table>
       </div>
 
-      {/* Mobile Responsive Cards View */}
+      {/*--------------|| Mobile Responsive Cards View ||--------------*/}
       <div className="block md:hidden divide-y divide-slate-100">
         {isLoading && cards.length === 0 ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -205,7 +209,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                 key={card.card_id}
                 className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition-colors"
               >
-                {/* Header: ID + Status */}
+                {/*--------------|| Card ID & Status Header ||--------------*/}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-bold text-slate-900">
@@ -243,7 +247,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </div>
                 </div>
 
-                {/* Client Name */}
+                {/*--------------|| Client Details ||--------------*/}
                 <div className="text-xs text-slate-700">
                   <span className="text-slate-400 block text-[11px]">
                     العميل المخصص:
@@ -253,7 +257,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </span>
                 </div>
 
-                {/* Redirect Link */}
+                {/*--------------|| Redirect Target Link ||--------------*/}
                 {card.target_url && (
                   <div className="flex items-center justify-between text-xs font-mono text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/80">
                     <span className="truncate dir-ltr text-right flex-1 text-[11px]">
@@ -270,7 +274,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </div>
                 )}
 
-                {/* Bottom Actions Bar on Mobile */}
+                {/*--------------|| Mobile Actions Bar ||--------------*/}
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
                   <span className="text-slate-500">
                     المسحات:{" "}
@@ -280,7 +284,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </span>
 
                   <div className="flex items-center gap-1.5">
-                    {/* QR Code Button */}
+                    {/* Show QR Code */}
                     <button
                       type="button"
                       onClick={() => onShowQR(card)}
@@ -291,7 +295,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                       <span className="text-[11px]">QR</span>
                     </button>
 
-                    {/* Simulate Button */}
+                    {/* Simulate Scan */}
                     <button
                       type="button"
                       onClick={() => onSimulateScan(card)}
@@ -301,7 +305,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                       <Eye className="w-4 h-4" />
                     </button>
 
-                    {/* Edit Button */}
+                    {/* Edit Card */}
                     <button
                       type="button"
                       onClick={() => onEditCard(card)}
@@ -311,7 +315,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                       <Edit2 className="w-4 h-4" />
                     </button>
 
-                    {/* Delete Button */}
+                    {/* Delete Card */}
                     <button
                       type="button"
                       onClick={() => onDeleteCard(card)}

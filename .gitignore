@@ -1,9 +1,9 @@
-# Environment files (حماية مفاتيح Supabase والأسرار)
+#--------------|| Environment Files & Secrets ||--------------#
 .env
 .env.local
 .env.*.local
 
-# Logs
+#--------------|| System & Application Logs ||--------------#
 logs
 *.log
 npm-debug.log*
@@ -12,13 +12,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies and Build
+#--------------|| Dependencies & Build Output ||--------------#
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+#--------------|| Editor & Operating System Files ||--------------#
 .vscode/*
 !.vscode/extensions.json
 .idea
