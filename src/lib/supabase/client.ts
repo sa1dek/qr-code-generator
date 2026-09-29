@@ -22,3 +22,6 @@ export function getSupabaseClient(): SupabaseClient | null {
   }
   return supabase;
 }
+
+//--------------|| Alias Export for createClient ||--------------//
+export { getSupabaseClient as createClient };

@@ -5,7 +5,7 @@ import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 import { validateCardId, parseCardRange } from "../../lib/validation/card";
 import { useToast } from "../ui/Toast";
-import { type BulkGenerateResult } from "../../types/card";
+import { type BulkGenerateResult, type AuthUser } from "../../types/card";
 import { createCardApi, createBulkCardsApi } from "../../lib/fetchUtils";
 
 //--------------|| Component Props Interface ||--------------//
@@ -13,6 +13,7 @@ interface GenerateCardsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  currentUser?: AuthUser | null; // إضافة استقبال بيانات المستخدم الحالي
 }
 
 //--------------|| Generate Cards Modal Component ||--------------//
@@ -20,6 +21,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  currentUser,
 }) => {
   const [mode, setMode] = useState<"single" | "bulk">("single");
   const [singleId, setSingleId] = useState("");
@@ -50,7 +52,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
 
     try {
       const formattedCardId = singleId.trim().toUpperCase();
-      const res = await createCardApi(formattedCardId);
+      const res = await createCardApi(formattedCardId, currentUser?.id);
 
       if (!res.ok || !res.data?.success) {
         throw new Error(res.data?.error || "تعذر إنشاء الكارت");
@@ -81,9 +83,11 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
     setBulkResult(null);
 
     try {
+      // تمرير الـ userId لربط الدفعة بالكامل بمالكها
       const res = await createBulkCardsApi(
         startId.trim().toUpperCase(),
         endId.trim().toUpperCase(),
+        currentUser?.id,
       );
 
       if (!res.ok || !res.data?.success) {
@@ -122,7 +126,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
       maxWidth="md"
     >
       <div className="space-y-4 pt-1" dir="rtl">
-        {/*--------------|| Mode Switcher Controls ||--------------*/}
+        {/*--------------|| Mode Switcher Controls ||--------------//*/}
         <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl">
           <button
             type="button"
@@ -159,14 +163,14 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
           </button>
         </div>
 
-        {/*--------------|| Error Notification Banner ||--------------*/}
+        {/*--------------|| Error Notification Banner ||--------------//*/}
         {errorMsg && (
           <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl">
             {errorMsg}
           </div>
         )}
 
-        {/*--------------|| Single Card Mode Form ||--------------*/}
+        {/*--------------|| Single Card Mode Form ||--------------//*/}
         {mode === "single" && (
           <form onSubmit={handleSingleSubmit} className="space-y-4">
             <Input
@@ -209,7 +213,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
           </form>
         )}
 
-        {/*--------------|| Bulk Generation Mode Form ||--------------*/}
+        {/*--------------|| Bulk Generation Mode Form ||--------------//*/}
         {mode === "bulk" && (
           <form onSubmit={handleBulkSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -246,7 +250,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
               </p>
             </div>
 
-            {/*--------------|| Bulk Action Results Feedback ||--------------*/}
+            {/*--------------|| Bulk Action Results Feedback ||--------------//*/}
             {bulkResult && (
               <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl space-y-1">
                 <p className="font-bold text-sm">

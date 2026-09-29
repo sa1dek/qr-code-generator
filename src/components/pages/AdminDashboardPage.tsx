@@ -11,7 +11,13 @@ import { DeleteConfirmModal } from "../admin/DeleteConfirmModal";
 import { AnalyticsView } from "../admin/AnalyticsView";
 import { DocsView } from "../admin/DocsView";
 import { Button } from "../ui/Button";
-import type { Card, DashboardStats as StatsType } from "../../types/card";
+import { UserCardsPage } from "./UserCardsPage";
+import { UsersManagementPage } from "../admin/UsersManagementPage";
+import type {
+  AuthUser,
+  Card,
+  DashboardStats as StatsType,
+} from "../../types/card";
 import { useToast } from "../ui/Toast";
 import { getCardsApi, deleteCardApi } from "../../lib/fetchUtils";
 
@@ -19,12 +25,14 @@ import { getCardsApi, deleteCardApi } from "../../lib/fetchUtils";
 interface AdminDashboardPageProps {
   onLogout: () => void;
   dbMode: "supabase" | "mock";
+  currentUser?: AuthUser | null;
 }
 
 //--------------|| Admin Dashboard Page Component ||--------------//
 export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onLogout,
   dbMode,
+  currentUser,
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>("dashboard");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -54,24 +62,27 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await getCardsApi();
+      const res = await getCardsApi(currentUser);
 
       if (res.ok && res.data?.cards) {
         const fetchedCards = res.data.cards;
-        setCards(fetchedCards);
 
-        //--------------|| Calculate Statistics ||--------------//
-        const totalCards = fetchedCards.length;
-        const activeCards = fetchedCards.filter(
+        // 👇 استبدل الفلترة القديمة بهذه الصياغة الدقيقة لتصفية كروت الأدمن الشخصية فقط وتجاهل كروت المستخدمين
+        const adminCards = fetchedCards.filter(
+          (c: any) => !c.user_id || c.user_id === currentUser?.id,
+        );
+        setCards(adminCards);
+
+        //--------------|| Calculate Statistics (لأدمن النظام فقط) ||--------------//
+        const totalCards = adminCards.length;
+        const activeCards = adminCards.filter(
           (c) => c.is_active && c.client_name,
         ).length;
-        const unassignedCards = fetchedCards.filter(
-          (c) => !c.client_name,
-        ).length;
-        const inactiveCards = fetchedCards.filter(
+        const unassignedCards = adminCards.filter((c) => !c.client_name).length;
+        const inactiveCards = adminCards.filter(
           (c) => !c.is_active && c.client_name,
         ).length;
-        const totalScans = fetchedCards.reduce(
+        const totalScans = adminCards.reduce(
           (acc, c) => acc + (c.scan_count || 0),
           0,
         );
@@ -93,7 +104,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [error]);
+  }, [error, currentUser, searchQuery, activeFilter]);
 
   useEffect(() => {
     fetchData();
@@ -152,6 +163,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         dbMode={dbMode}
         onLogout={onLogout}
+        currentUser={currentUser}
       />
 
       {/*--------------|| Main Content Area ||--------------*/}
@@ -172,6 +184,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <h1 className="text-base sm:text-lg font-bold text-slate-900">
                 {currentTab === "dashboard" && "لوحة التحكم الرئيسية"}
                 {currentTab === "cards" && "إدارة كروت NFC & QR"}
+                {currentTab === "user-cards" && "كروت المستخدمين"}
                 {currentTab === "analytics" && "تحليلات المسح والزيارات"}
                 {currentTab === "docs" && "دليل الاستخدام والبرمجة"}
               </h1>
@@ -260,6 +273,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               />
             </div>
           )}
+
+          {/*--------------|| User Cards Dedicated Tab ||--------------*/}
+          {currentTab === "user-cards" && (
+            <UserCardsPage
+              onShowQR={setSelectedCardForQR}
+              onSimulateScan={setSelectedCardForSim}
+            />
+          )}
+
+          {currentTab === "users-management" && <UsersManagementPage />}
 
           {/*--------------|| Scan Analytics Tab ||--------------*/}
           {currentTab === "analytics" && (

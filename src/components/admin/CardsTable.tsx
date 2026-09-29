@@ -10,6 +10,7 @@ import {
   Trash2,
   Check,
   Eye,
+  User,
 } from "lucide-react";
 import { Card, getCardStatus } from "../../types/card";
 import { CardRow } from "./CardRow";
@@ -137,6 +138,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
             <tr className="bg-slate-50/70 border-b border-slate-200 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
               <th className="py-3 px-4">معرف الكارت</th>
               <th className="py-3 px-4">الحالة</th>
+              <th className="py-3 px-4">مالك الكارت (User)</th>
               <th className="py-3 px-4">العميل المخصص</th>
               <th className="py-3 px-4">رابط التقييم (Google Review)</th>
               <th className="py-3 px-4 text-center">عمليات المسح</th>
@@ -154,6 +156,9 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                     <div className="h-5 w-20 bg-slate-100 rounded-full" />
                   </td>
                   <td className="py-4 px-4">
+                    <div className="h-4 w-28 bg-slate-100 rounded" />
+                  </td>
+                  <td className="py-4 px-4">
                     <div className="h-4 w-32 bg-slate-100 rounded" />
                   </td>
                   <td className="py-4 px-4">
@@ -168,19 +173,131 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                 </tr>
               ))
             ) : cards.length > 0 ? (
-              cards.map((card) => (
-                <CardRow
-                  key={card.card_id}
-                  card={card}
-                  onEdit={onEditCard}
-                  onShowQR={onShowQR}
-                  onDelete={onDeleteCard}
-                  onSimulateScan={onSimulateScan}
-                />
-              ))
+              cards.map((card: any) => {
+                const status = getCardStatus(card);
+                return (
+                  <tr
+                    key={card.card_id}
+                    className="hover:bg-slate-50/60 transition-colors"
+                  >
+                    {/* Card ID */}
+                    <td className="py-4 px-4 font-mono font-bold text-slate-900 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span>{card.card_id}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(card.card_id)}
+                          className="p-1 rounded bg-slate-100 text-slate-500 hover:text-slate-800"
+                          title="نسخ الرابط"
+                        >
+                          {copiedId === card.card_id ? (
+                            <Check className="w-3 h-3 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-4 px-4">
+                      {status === "active" && (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          مُفعّل
+                        </span>
+                      )}
+                      {status === "unassigned" && (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                          غير مخصص
+                        </span>
+                      )}
+                      {status === "inactive" && (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          معطل
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Owner Email / User Tag */}
+                    <td className="py-4 px-4 text-xs">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono text-[11px]">
+                        <User className="w-3 h-3 shrink-0" />
+                        <span className="truncate max-w-[150px]">
+                          {card.owner_email || card.user_id || "أدمن النظام"}
+                        </span>
+                      </span>
+                    </td>
+
+                    {/* Client Name */}
+                    <td className="py-4 px-4 text-xs font-semibold text-slate-800">
+                      {card.client_name || "— غير مسمى —"}
+                    </td>
+
+                    {/* Target URL */}
+                    <td className="py-4 px-4 text-xs font-mono text-slate-600 max-w-xs truncate">
+                      {card.target_url ? (
+                        <a
+                          href={card.target_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-blue-600 inline-flex items-center gap-1 truncate dir-ltr text-right"
+                        >
+                          <span className="truncate">{card.target_url}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                        </a>
+                      ) : (
+                        <span className="text-slate-400">لا يوجد رابط</span>
+                      )}
+                    </td>
+
+                    {/* Scan Count */}
+                    <td className="py-4 px-4 text-center font-mono text-xs font-bold text-slate-900">
+                      {card.scan_count || 0}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-4 px-4 text-left">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onShowQR(card)}
+                          className="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors"
+                          title="عرض QR Code"
+                        >
+                          <QrCode className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onSimulateScan(card)}
+                          className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                          title="محاكاة مسح"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onEditCard(card)}
+                          className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                          title="تعديل الكارت"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteCard(card)}
+                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                          title="حذف الكارت"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={6} className="py-12 text-center">
+                <td colSpan={7} className="py-12 text-center">
                   <p className="text-base font-bold text-slate-800">
                     لا توجد كروت مطابقة
                   </p>
@@ -202,14 +319,14 @@ export const CardsTable: React.FC<CardsTableProps> = ({
             </div>
           ))
         ) : cards.length > 0 ? (
-          cards.map((card) => {
+          cards.map((card: any) => {
             const status = getCardStatus(card);
             return (
               <div
                 key={card.card_id}
                 className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition-colors"
               >
-                {/*--------------|| Card ID & Status Header ||--------------*/}
+                {/* Card ID & Status Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-bold text-slate-900">
@@ -247,7 +364,17 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </div>
                 </div>
 
-                {/*--------------|| Client Details ||--------------*/}
+                {/* Owner Info Tag */}
+                <div className="text-xs text-slate-700 flex items-center justify-between bg-indigo-50/60 p-2 rounded-lg border border-indigo-100">
+                  <span className="text-slate-500 text-[11px]">
+                    مالك الكارت:
+                  </span>
+                  <span className="font-mono font-semibold text-indigo-700 text-[11px] truncate max-w-[200px]">
+                    {card.owner_email || card.user_id || "أدمن النظام"}
+                  </span>
+                </div>
+
+                {/* Client Details */}
                 <div className="text-xs text-slate-700">
                   <span className="text-slate-400 block text-[11px]">
                     العميل المخصص:
@@ -257,7 +384,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </span>
                 </div>
 
-                {/*--------------|| Redirect Target Link ||--------------*/}
+                {/* Redirect Target Link */}
                 {card.target_url && (
                   <div className="flex items-center justify-between text-xs font-mono text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/80">
                     <span className="truncate dir-ltr text-right flex-1 text-[11px]">
@@ -274,7 +401,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </div>
                 )}
 
-                {/*--------------|| Mobile Actions Bar ||--------------*/}
+                {/* Mobile Actions Bar */}
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
                   <span className="text-slate-500">
                     المسحات:{" "}
@@ -284,7 +411,6 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                   </span>
 
                   <div className="flex items-center gap-1.5">
-                    {/* Show QR Code */}
                     <button
                       type="button"
                       onClick={() => onShowQR(card)}
@@ -294,8 +420,6 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                       <QrCode className="w-4 h-4" />
                       <span className="text-[11px]">QR</span>
                     </button>
-
-                    {/* Simulate Scan */}
                     <button
                       type="button"
                       onClick={() => onSimulateScan(card)}
@@ -304,8 +428,6 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-
-                    {/* Edit Card */}
                     <button
                       type="button"
                       onClick={() => onEditCard(card)}
@@ -314,8 +436,6 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-
-                    {/* Delete Card */}
                     <button
                       type="button"
                       onClick={() => onDeleteCard(card)}

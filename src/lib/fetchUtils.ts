@@ -40,12 +40,22 @@ export async function safeFetchJson<T = any>(
   };
 }
 
-//--------------|| Fetch All Cards ||--------------//
-export async function getCardsApi() {
-  const { data, error } = await supabase
+//--------------|| Fetch All Cards (With User Profile Join) ||--------------//
+export async function getCardsApi(user?: { id: string; role: string } | null) {
+  let query = supabase
     .from("cards")
-    .select("*")
+    .select("*, profiles(email)") 
     .order("created_at", { ascending: false });
+
+  if (user) {
+    if (user.role !== "admin") {
+      query = query.eq("user_id", user.id);
+    }
+  } else {
+    query = query.is("user_id", null);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return {
@@ -55,18 +65,53 @@ export async function getCardsApi() {
     };
   }
 
-  return { ok: true, status: 200, data: { success: true, cards: data || [] } };
+  const formattedCards = (data || []).map((card: any) => ({
+    ...card,
+    owner_email:
+      card.profiles?.email || (card.user_id ? "مستخدم مسجل" : "كارت عام/أدمن"),
+  }));
+
+  return {
+    ok: true,
+    status: 200,
+    data: { success: true, cards: formattedCards },
+  };
 }
 
 //--------------|| Create Single Card ||--------------//
-export async function createCardApi(cardId: string) {
+export async function createCardApi(cardId: string, userId?: string | null) {
+  const normalizedId = cardId.trim().toUpperCase();
+
+  // جلب الـ ID مباشرة من جلسة Supabase لضمان عدم وجود قيم فارغة
+  const { data: sessionData } = await supabase.auth.getSession();
+  const currentAuthId = sessionData?.session?.user?.id;
+
+  const finalUserId = userId || currentAuthId || null;
+
   const { data, error } = await supabase
     .from("cards")
-    .insert([{ card_id: cardId, is_active: false }])
+    .insert([
+      {
+        card_id: normalizedId,
+        user_id: finalUserId,
+        is_active: false,
+        scan_count: 0,
+      },
+    ])
     .select()
     .single();
 
   if (error) {
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        status: 400,
+        data: {
+          success: false,
+          error: "معرف الكارت موجود بالفعل (Duplicate ID)",
+        },
+      };
+    }
     return {
       ok: false,
       status: 400,
@@ -77,8 +122,12 @@ export async function createCardApi(cardId: string) {
   return { ok: true, status: 200, data: { success: true, card: data } };
 }
 
-//--------------|| Bulk Create Cards ||--------------//
-export async function createBulkCardsApi(startId: string, endId: string) {
+//--------------|| Bulk Create Cards (With User Link) ||--------------//
+export async function createBulkCardsApi(
+  startId: string,
+  endId: string,
+  userId?: string | null,
+) {
   const startNum = parseInt(startId.replace(/\D/g, ""), 10);
   const endNum = parseInt(endId.replace(/\D/g, ""), 10);
   const prefix = startId.replace(/\d+/g, "");
@@ -93,8 +142,13 @@ export async function createBulkCardsApi(startId: string, endId: string) {
 
   const cardsToInsert = [];
   for (let i = startNum; i <= endNum; i++) {
-    const formattedId = `${prefix}${String(i).padStart(2, "0")}`;
-    cardsToInsert.push({ card_id: formattedId, is_active: false });
+    const formattedId = `${prefix}${String(i).padStart(2, "0")}`.toUpperCase();
+    cardsToInsert.push({
+      card_id: formattedId,
+      user_id: userId || null,
+      is_active: false,
+      scan_count: 0,
+    });
   }
 
   const { data, error } = await supabase
@@ -122,10 +176,11 @@ export async function updateCardApi(
     is_active: boolean;
   }>,
 ) {
+  const normalizedId = cardId.trim().toUpperCase();
   const { data, error } = await supabase
     .from("cards")
     .update(updates)
-    .eq("card_id", cardId)
+    .eq("card_id", normalizedId)
     .select()
     .single();
 
@@ -142,7 +197,11 @@ export async function updateCardApi(
 
 //--------------|| Delete Card ||--------------//
 export async function deleteCardApi(cardId: string) {
-  const { error } = await supabase.from("cards").delete().eq("card_id", cardId);
+  const normalizedId = cardId.trim().toUpperCase();
+  const { error } = await supabase
+    .from("cards")
+    .delete()
+    .eq("card_id", normalizedId);
 
   if (error) {
     return {

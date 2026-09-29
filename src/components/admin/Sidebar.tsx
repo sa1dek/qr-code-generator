@@ -2,19 +2,27 @@ import React from "react";
 import {
   LayoutDashboard,
   CreditCard,
+  Users,
   BarChart3,
   BookOpen,
   LogOut,
   X,
   ExternalLink,
-  Database,
   Radio,
-  Sliders,
+  ShieldCheck,
+  Shield,
+  User as UserIcon,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import type { AuthUser } from "../../types/card";
 
-//--------------|| Types & Component Props Interface ||--------------//
-export type AdminTab = "dashboard" | "cards" | "analytics" | "docs";
+export type AdminTab =
+  | "dashboard"
+  | "cards"
+  | "user-cards"
+  | "users-management"
+  | "analytics"
+  | "docs";
 
 interface SidebarProps {
   currentTab: AdminTab;
@@ -23,9 +31,9 @@ interface SidebarProps {
   onCloseMobile: () => void;
   dbMode: "supabase" | "mock";
   onLogout: () => void;
+  currentUser?: AuthUser | null;
 }
 
-//--------------|| Sidebar Component ||--------------//
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
@@ -33,8 +41,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   dbMode,
   onLogout,
+  currentUser,
 }) => {
-  //--------------|| Navigation Items Configuration ||--------------//
+  const isAdmin = currentUser?.role === "admin";
+
+  // القائمة الجانبية: تظهر كروت المستخدمين للأدمن فقط وتختفي عن اليوزر العادي
   const navItems = [
     {
       id: "dashboard" as AdminTab,
@@ -42,6 +53,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: LayoutDashboard,
     },
     { id: "cards" as AdminTab, label: "إدارة الكروت", icon: CreditCard },
+
+    // تظهر للأدمن فقط
+    ...(isAdmin
+      ? [
+          {
+            id: "user-cards" as AdminTab,
+            label: "كروت المستخدمين",
+            icon: Users,
+          },
+          {
+            id: "users-management" as AdminTab,
+            label: "إدارة المستخدمين",
+            icon: Shield,
+          },
+        ]
+      : []),
     {
       id: "analytics" as AdminTab,
       label: "سجل المسحات والتحليلات",
@@ -50,10 +77,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "docs" as AdminTab, label: "دليل NFC & QR", icon: BookOpen },
   ];
 
-  //--------------|| Sidebar Inner Layout ||--------------//
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-4" dir="rtl">
-      {/*--------------|| Brand Header & Mobile Close ||--------------*/}
       <div>
         <div className="flex items-center justify-between pb-5 border-b border-slate-200/80 mb-5">
           <div className="flex items-center gap-2.5">
@@ -80,7 +105,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/*--------------|| Navigation Menu Links ||--------------*/}
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -113,49 +137,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/*--------------|| Database Status Badge & User Footer ||--------------*/}
       <div className="space-y-3 pt-4 border-t border-slate-200/80">
-        {/*--------------|| Database Mode Indicator ||--------------*/}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">
+        {/* بطاقة تعريف نوع الحساب الحالي (أدمن أو مستخدم عادي) */}
+        {/* بطاقة تعريف نوع الحساب الحالي */}
+        <div
+          className={cn(
+            "border rounded-xl p-3 text-xs transition-all shadow-2xs",
+            isAdmin
+              ? "bg-indigo-50/90 border-indigo-200 text-indigo-900"
+              : "bg-slate-100 border-slate-300 text-slate-800",
+          )}
+        >
           <div className="flex items-center justify-between mb-1">
-            <span className="text-slate-500 text-[11px] font-medium">
-              قاعدة البيانات:
+            <span className="text-[11px] font-semibold opacity-75">
+              نوع الحساب:
             </span>
             <span
               className={cn(
-                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
-                dbMode === "supabase"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-amber-100 text-amber-800",
+                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow-2xs",
+                isAdmin
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-800 text-white",
               )}
             >
-              {dbMode === "supabase" ? "Supabase Live" : "Mock DB Mode"}
+              {isAdmin ? (
+                <ShieldCheck className="w-3 h-3" />
+              ) : (
+                <UserIcon className="w-3 h-3" />
+              )}
+              {isAdmin ? "Admin" : "User"}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 leading-normal">
-            {dbMode === "supabase"
-              ? "متصل بقاعدة بيانات Supabase السحابية."
-              : "وضع محاكاة سريع مع بيانات تجريبية جاهزة."}
+          <p
+            className="text-[11px] font-bold truncate font-mono mt-1"
+            title={currentUser?.email}
+          >
+            {currentUser?.email || "مستخدم مسجل"}
           </p>
         </div>
 
-        {/*--------------|| External Preview Link ||--------------*/}
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
-        >
-          <span className="flex items-center gap-2">
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>عرض الصفحة الرئيسية</span>
-          </span>
-          <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">
-            Preview
-          </span>
-        </a>
-
-        {/*--------------|| User Logout Action ||--------------*/}
         <button
           type="button"
           onClick={onLogout}
@@ -170,12 +190,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/*--------------|| Desktop View Sidebar ||--------------*/}
       <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 right-0 bg-white border-l border-slate-200/80 z-20">
         {sidebarContent}
       </aside>
 
-      {/*--------------|| Mobile Drawer Overlay & Sidebar ||--------------*/}
       {isOpenMobile && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div

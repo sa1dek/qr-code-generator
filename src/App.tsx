@@ -4,6 +4,7 @@ import { HomePage } from "./components/pages/HomePage";
 import { LoginPage } from "./components/pages/LoginPage";
 import { AdminDashboardPage } from "./components/pages/AdminDashboardPage";
 import { supabase } from "./lib/fetchUtils";
+import { AuthUser } from "./types/card";
 
 //--------------|| Main Application Root Component ||--------------//
 export default function App() {
@@ -12,7 +13,13 @@ export default function App() {
   });
 
   const [authToken, setAuthToken] = useState<string | null>(() => {
-    return localStorage.getItem("review_cards_token") || "demo_token";
+    return localStorage.getItem("review_cards_token") || null;
+  });
+
+  // تخزين بيانات المستخدم الحالي (دور وصلاحيات)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const savedUser = localStorage.getItem("review_cards_current_user");
+    return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const [dbMode, setDbMode] = useState<"supabase" | "mock">("supabase");
@@ -29,7 +36,6 @@ export default function App() {
 
         const handleRedirect = async () => {
           try {
-            //--------------|| Fetch Card Details from Supabase ||--------------//
             const { data, error } = await supabase
               .from("cards")
               .select("target_url, is_active, scan_count")
@@ -54,7 +60,6 @@ export default function App() {
               return;
             }
 
-            //--------------|| Increment Scan Counter ||--------------//
             await supabase
               .from("cards")
               .update({
@@ -63,14 +68,12 @@ export default function App() {
               })
               .eq("card_id", cardId);
 
-            //--------------|| Enforce Valid Absolute URL Protocol ||--------------//
             const finalUrl =
               data.target_url.startsWith("http://") ||
               data.target_url.startsWith("https://")
                 ? data.target_url
                 : `https://${data.target_url}`;
 
-            //--------------|| Instant Redirect Execution ||--------------//
             window.location.href = finalUrl;
           } catch (err) {
             setRedirectError("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
@@ -98,15 +101,19 @@ export default function App() {
     setCurrentPath(path);
   };
 
-  const handleLoginSuccess = (token: string, user: any) => {
+  const handleLoginSuccess = (token: string, user: AuthUser) => {
     setAuthToken(token);
+    setCurrentUser(user);
     localStorage.setItem("review_cards_token", token);
+    localStorage.setItem("review_cards_current_user", JSON.stringify(user));
     navigateTo("/admin");
   };
 
   const handleLogout = () => {
     setAuthToken(null);
+    setCurrentUser(null);
     localStorage.removeItem("review_cards_token");
+    localStorage.removeItem("review_cards_current_user");
     navigateTo("/admin/login");
   };
 
@@ -123,12 +130,6 @@ export default function App() {
             </div>
             <h2 className="text-lg font-bold text-slate-100">تعذر التوجيه</h2>
             <p className="text-sm text-slate-400">{redirectError}</p>
-            {/* <button
-              onClick={() => navigateTo("/")}
-              className="w-full py-2.5 px-4 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm font-medium transition"
-            >
-              العودة للرئيسية
-            </button> */}
           </div>
         ) : (
           <div className="space-y-3">
@@ -164,7 +165,11 @@ export default function App() {
       );
     } else {
       content = (
-        <AdminDashboardPage onLogout={handleLogout} dbMode="supabase" />
+        <AdminDashboardPage
+          onLogout={handleLogout}
+          dbMode="supabase"
+          currentUser={currentUser}
+        />
       );
     }
   } else {
