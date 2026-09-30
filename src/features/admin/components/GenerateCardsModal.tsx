@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { CreditCard, Layers, PlusCircle } from "lucide-react";
+import { CreditCard, Layers, PlusCircle, ShieldCheck } from "lucide-react";
 import { Modal } from "../../../components/ui/Modal";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
+import { Select } from "../../../components/ui/Select";
 import { validateCardId, parseCardRange } from "../../../validation/card";
 import { useToast } from "../../../components/ui/Toast";
-import { type BulkGenerateResult, type AuthUser } from "../../../types/card";
+import {
+  type BulkGenerateResult,
+  type AuthUser,
+  type UserProfile,
+} from "../../../types/card";
 import { createSingleCard, createBulkCards } from "../../cards/services/cardService";
+import { getAllProfiles } from "../services/adminService";
+
+/** Sentinel for "no client picked" — keep it out of the UUID space. */
+const SYSTEM_OWNER = "__system__";
 
 //--------------|| Component Props Interface ||--------------//
 interface GenerateCardsModalProps {
@@ -15,6 +24,12 @@ interface GenerateCardsModalProps {
   onSuccess: () => void;
   currentUser?: AuthUser | null;
   mode?: "single" | "both";
+  /**
+   * Admin-only. Reveals the owner dropdown so a card can either stay in the
+   * admin's own inventory or be handed straight to a registered client. Regular
+   * users always create cards for themselves, so they never see it.
+   */
+  allowAssignToUser?: boolean;
 }
 
 //--------------|| Generate Cards Modal Component ||--------------//
@@ -24,6 +39,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
   onSuccess,
   currentUser,
   mode: modeProp = "both",
+  allowAssignToUser = false,
 }) => {
   const [mode, setMode] = useState<"single" | "bulk">("single");
 
@@ -36,7 +52,33 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bulkResult, setBulkResult] = useState<BulkGenerateResult | null>(null);
+  const [ownerId, setOwnerId] = useState<string>(SYSTEM_OWNER);
+  const [clients, setClients] = useState<UserProfile[]>([]);
   const { success, error: toastError } = useToast();
+
+  //--------------|| Load Registered Clients For The Dropdown ||--------------//
+  useEffect(() => {
+    if (!isOpen || !allowAssignToUser || clients.length > 0) return;
+
+    let isActive = true;
+    getAllProfiles().then(({ users }) => {
+      if (!isActive) return;
+      setClients(users.filter((u) => u.role === "user"));
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [isOpen, allowAssignToUser, clients.length]);
+
+  //--------------|| Resolve The Card Owner ||--------------//
+  // A picked client wins; otherwise the card is stamped with the admin's own id
+  // so it belongs to the admin's primary inventory instead of floating in the
+  // unassigned pool.
+  const resolveOwnerId = (): string | null =>
+    ownerId === SYSTEM_OWNER ? currentUser?.id || null : ownerId;
+
+  const isSystemOwned = ownerId === SYSTEM_OWNER;
 
   //--------------|| Reset Form State ||--------------//
   const handleReset = () => {
@@ -58,13 +100,20 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
 
     try {
       const formattedCardId = singleId.trim().toUpperCase();
-      const res = await createSingleCard(formattedCardId, currentUser?.id);
+      const res = await createSingleCard(
+        formattedCardId,
+        resolveOwnerId(),
+      );
 
       if (!res.success) {
         throw new Error(res.error || "تعذر إنشاء الكارت");
       }
 
-      success(`تم إنشاء الكارت ${res.card?.card_id || singleId} بنجاح`);
+      success(
+        isSystemOwned
+          ? `تم إنشاء الكارت ${res.card?.card_id || singleId} ككارت نظام/أدمن بنجاح`
+          : `تم إنشاء الكارت ${res.card?.card_id || singleId} وتعيينه للعميل بنجاح`,
+      );
       handleReset();
       onSuccess();
       onClose();
@@ -92,13 +141,17 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
       const res = await createBulkCards(
         startId.trim().toUpperCase(),
         endId.trim().toUpperCase(),
-        currentUser?.id,
+        resolveOwnerId(),
       );
 
       setBulkResult(res);
 
       if (res.totalCreated > 0) {
-        success(`تم إنشاء ${res.totalCreated} كارت بنجاح`);
+        success(
+          isSystemOwned
+            ? `تم إنشاء ${res.totalCreated} كارت نظام/أدمن بنجاح`
+            : `تم إنشاء ${res.totalCreated} كارت وتعيينها للعميل بنجاح`,
+        );
         onSuccess();
       } else {
         setErrorMsg("لم يتم إنشاء أي كروت، قد تكون جميعها موجودة بالفعل");
@@ -154,6 +207,40 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
           </div>
         )}
 
+        {/*--------------|| Card Owner Selector (Admin Only) ||--------------//*/}
+        {allowAssignToUser && (
+          <div className="rounded-xl border border-border-subtle bg-surface-800/60 p-3 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-text-secondary">
+              <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
+              ملكية الكارت
+            </div>
+
+            <Select
+              label="مالك الكارت (Owner)"
+              value={ownerId}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                setOwnerId(e.target.value);
+                setErrorMsg(null);
+              }}
+              options={[
+                { value: SYSTEM_OWNER, label: "كارت نظام/أدمن" },
+                ...clients.map((c) => ({ value: c.id, label: c.email })),
+              ]}
+              helperText={
+                isSystemOwned
+                  ? "سيتم حفظ الكارت باسم حسابك الإداري ضمن مخزونك الأساسي."
+                  : "سيتم حفظ الكارت في حساب العميل المحدد مباشرة."
+              }
+            />
+
+            {clients.length === 0 && (
+              <p className="text-[11px] text-text-muted">
+                لا يوجد عملاء مسجلون حالياً — كل الكروت ستُنشأ ككارت نظام/أدمن.
+              </p>
+            )}
+          </div>
+        )}
+
         {/*--------------|| Error Notification Alert ||--------------//*/}
         {errorMsg && (
           <div className="p-3 bg-status-danger-bg border border-status-danger-border rounded-xl text-status-danger-text text-xs">
@@ -178,9 +265,30 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
             />
 
             <div className="bg-surface-800/60 border border-border-subtle rounded-xl p-3 text-xs text-text-muted">
-              سيتم إنشاء الكارت كـ{" "}
-              <strong className="text-text-primary">غير مخصص (Unassigned)</strong>{" "}
-              حتى تقوم بربطه بعميل ورابط تقييم Google Review لاحقاً.
+              {allowAssignToUser ? (
+                isSystemOwned ? (
+                  <>
+                    سيتم إنشاء الكارت كـ{" "}
+                    <strong className="text-text-primary">كارت نظام/أدمن</strong>{" "}
+                    باسم حسابك الإداري، ويظهر في مخزونك الأساسي حتى تقوم بربطه
+                    برابط تقييم Google Review لاحقاً.
+                  </>
+                ) : (
+                  <>
+                    سيتم إنشاء الكارت وتعيينه مباشرة إلى حساب العميل{" "}
+                    <strong className="text-text-primary">
+                      {clients.find((c) => c.id === ownerId)?.email}
+                    </strong>
+                    .
+                  </>
+                )
+              ) : (
+                <>
+                  سيتم إنشاء الكارت كـ{" "}
+                  <strong className="text-text-primary">غير مخصص (Unassigned)</strong>{" "}
+                  حتى تقوم بربطه بعميل ورابط تقييم Google Review لاحقاً.
+                </>
+              )}
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-3 border-t border-border-subtle">
@@ -240,6 +348,13 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
                 <li>يجب أن يتطابق المقطع النصي (البادئة) في كلا الحقلين.</li>
                 <li>يتم حفظ طول الأرقام مع الأصفار المسبقة تلقائياً.</li>
                 <li>يتم تخطي أي معرف كارت موجود مسبقاً في قاعدة البيانات.</li>
+                {allowAssignToUser && (
+                  <li>
+                    {isSystemOwned
+                      ? "كل الكروت في الدفعة سيتم حفظها باسم حسابك الإداري."
+                      : "كل الكروت في الدفعة سيتم حفظها في حساب العميل المحدد."}
+                  </li>
+                )}
               </ul>
             </div>
 

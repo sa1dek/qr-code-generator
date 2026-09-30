@@ -22,11 +22,14 @@ import { AssignCardModal } from "../../features/admin/components/AssignCardModal
 import { CardStatusBadge } from "../../features/cards/components/CardStatus";
 
 interface AdminUserCardsPageProps {
+  /** Logged-in admin, excluded so their system cards are not listed here. */
+  adminId?: string | null;
   onShowQR: (card: Card) => void;
   onSimulateScan: (card: Card) => void;
 }
 
 export const AdminUserCardsPage: React.FC<AdminUserCardsPageProps> = ({
+  adminId,
   onShowQR,
   onSimulateScan,
 }) => {
@@ -39,13 +42,13 @@ export const AdminUserCardsPage: React.FC<AdminUserCardsPageProps> = ({
   const fetchUserCards = useCallback(async () => {
     setIsLoading(true);
     try {
-      const fetchedCards = await getUserAssignedCards();
+      const fetchedCards = await getUserAssignedCards(adminId);
       setCards(fetchedCards);
     } catch {
       toastError("فشل في جلب كروت المستخدمين");
     }
     setIsLoading(false);
-  }, [toastError]);
+  }, [adminId, toastError]);
 
   useEffect(() => {
     fetchUserCards();

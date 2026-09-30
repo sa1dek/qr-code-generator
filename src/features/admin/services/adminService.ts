@@ -6,22 +6,40 @@ import type {
   Card,
 } from "../../../types";
 
-export async function getAdminOnlyCards(): Promise<Card[]> {
+/**
+ * The admin's primary card inventory: the unassigned system pool (`user_id IS
+ * NULL`) plus every card the logged-in admin owns outright (`user_id = adminId`).
+ *
+ * Both halves have to be in here. Cards created from the admin dashboard are
+ * stamped with the admin's own id so they are attributable, which means a plain
+ * `user_id IS NULL` filter would hide them from the very table and the
+ * "إجمالي الكروت" counter they are supposed to be counted in.
+ */
+export async function getAdminOnlyCards(
+  adminId?: string | null,
+): Promise<Card[]> {
   if (!isSupabaseConfigured) return [];
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("cards")
       .select("*, profiles(email)")
-      .is("user_id", null)
       .order("created_at", { ascending: false });
+
+    query = adminId
+      ? query.or(`user_id.is.null,user_id.eq.${adminId}`)
+      : query.is("user_id", null);
+
+    const { data, error } = await query;
 
     if (error || !data) return [];
 
     return data.map((card: any) => ({
       ...card,
       owner_email:
-        card.profiles?.email || "كارت نظام/أدمن",
+        card.user_id && card.user_id !== adminId
+          ? card.profiles?.email || "مستخدم مسجل"
+          : "كارت نظام/أدمن",
     })) as Card[];
   } catch (err) {
     console.warn("adminService.getAdminOnlyCards error:", err);
@@ -29,15 +47,29 @@ export async function getAdminOnlyCards(): Promise<Card[]> {
   }
 }
 
-export async function getUserAssignedCards(): Promise<Card[]> {
+/**
+ * Cards owned by registered clients, i.e. the "كروت المستخدمين" view.
+ *
+ * `adminId` is excluded so the admin's own system cards are not reported as
+ * client cards and are not double-counted in both dashboards.
+ */
+export async function getUserAssignedCards(
+  adminId?: string | null,
+): Promise<Card[]> {
   if (!isSupabaseConfigured) return [];
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("cards")
       .select("*, profiles(email)")
       .not("user_id", "is", null)
       .order("created_at", { ascending: false });
+
+    if (adminId) {
+      query = query.neq("user_id", adminId);
+    }
+
+    const { data, error } = await query;
 
     if (error || !data) return [];
 
@@ -52,8 +84,10 @@ export async function getUserAssignedCards(): Promise<Card[]> {
   }
 }
 
-export async function getAdminDashboardStats(): Promise<DashboardStats> {
-  const cards = await getAdminOnlyCards();
+export async function getAdminDashboardStats(
+  adminId?: string | null,
+): Promise<DashboardStats> {
+  const cards = await getAdminOnlyCards(adminId);
 
   let recentScans: any[] = [];
   if (isSupabaseConfigured) {

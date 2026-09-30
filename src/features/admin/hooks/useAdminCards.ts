@@ -5,7 +5,10 @@ import { useToast } from "../../../components/ui/Toast";
 
 export type AdminCardFilter = "admin-only" | "user-assigned" | "all";
 
-export function useAdminCards(initialFilter: AdminCardFilter = "admin-only") {
+export function useAdminCards(
+  initialFilter: AdminCardFilter = "admin-only",
+  adminId?: string | null,
+) {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<AdminCardFilter>(initialFilter);
@@ -17,13 +20,13 @@ export function useAdminCards(initialFilter: AdminCardFilter = "admin-only") {
     try {
       let data: Card[] = [];
       if (filter === "admin-only") {
-        data = await getAdminOnlyCards();
+        data = await getAdminOnlyCards(adminId);
       } else if (filter === "user-assigned") {
-        data = await getUserAssignedCards();
+        data = await getUserAssignedCards(adminId);
       } else {
         const [adminCards, userCards] = await Promise.all([
-          getAdminOnlyCards(),
-          getUserAssignedCards(),
+          getAdminOnlyCards(adminId),
+          getUserAssignedCards(adminId),
         ]);
         data = [...adminCards, ...userCards].sort(
           (a, b) =>
@@ -36,7 +39,7 @@ export function useAdminCards(initialFilter: AdminCardFilter = "admin-only") {
     } finally {
       setIsLoading(false);
     }
-  }, [filter, toastError]);
+  }, [adminId, filter, toastError]);
 
   useEffect(() => {
     fetchCards();

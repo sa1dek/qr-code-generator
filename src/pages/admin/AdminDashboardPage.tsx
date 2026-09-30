@@ -58,9 +58,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const adminId = currentUser?.id || null;
       const [fetchedCards, fetchedStats] = await Promise.all([
-        getAdminOnlyCards(),
-        getAdminDashboardStats(),
+        getAdminOnlyCards(adminId),
+        getAdminDashboardStats(adminId),
       ]);
 
       setCards(fetchedCards);
@@ -71,7 +72,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [error]);
+  }, [currentUser, error]);
 
   useEffect(() => {
     fetchData();
@@ -262,6 +263,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {currentTab === "user-cards" && (
             <AdminUserCardsPage
+              adminId={currentUser?.id || null}
               onShowQR={setSelectedCardForQR}
               onSimulateScan={setSelectedCardForSim}
             />
@@ -297,6 +299,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={fetchData}
+        currentUser={currentUser}
+        allowAssignToUser
       />
 
       <QRCodeModal
