@@ -17,55 +17,57 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGoToLogin,
   onGoToDashboard,
 }) => {
-  const { language, setLanguage, t, isRTL } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
-    <header className="border-b border-[#2e2e2e] bg-[#212121] sticky top-0 z-40">
+    <header className="border-b border-border-subtle bg-surface-900/90 backdrop-blur-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
-        {/* Logo / Brand */}
-        <div
+        <button
+          type="button"
           onClick={onGoToDashboard || (() => { window.location.href = "/"; })}
-          className="flex items-center gap-3 cursor-pointer select-none"
+          className="flex items-center gap-3 text-start cursor-pointer select-none min-w-0"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#f15827] text-white flex items-center justify-center shadow-xs">
+          <div className="w-9 h-9 shrink-0 rounded-xl bg-brand text-text-inverse flex items-center justify-center shadow-xs">
             <Radio className="w-5 h-5" />
           </div>
-          <div>
-            <h1 className="font-bold text-sm sm:text-base text-slate-100 leading-tight">
+          <div className="min-w-0">
+            <h1 className="font-bold text-sm sm:text-base text-text-primary leading-tight truncate">
               {t("heroTitle")}
             </h1>
-            <p className="text-[10px] sm:text-xs text-slate-400 font-mono">
+            <p className="text-[10px] sm:text-xs text-text-muted font-mono truncate">
               NFC & QR Review System
             </p>
           </div>
-        </div>
+        </button>
 
-        {/* Actions / User controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Language Switcher */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
+            type="button"
             onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#333333] bg-[#1e1e1e] hover:bg-[#2a2a2a] text-xs font-medium text-slate-300 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-850 hover:bg-surface-800 hover:border-brand/40 text-xs font-medium text-text-secondary transition-all duration-200 ease-out-expo active:scale-95 whitespace-nowrap"
           >
-            <Globe className="w-3.5 h-3.5 text-[#f15827]" />
+            <Globe className="w-3.5 h-3.5 text-brand" />
             <span>{language === "ar" ? "English" : "العربية"}</span>
           </button>
 
           {currentUser ? (
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1e1e1e] border border-[#333333] text-xs text-slate-300">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-850 border border-border-subtle text-xs text-text-secondary max-w-[220px]">
                 {currentUser.role === "admin" ? (
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#f15827]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand shrink-0" />
                 ) : (
-                  <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+                  <UserIcon className="w-3.5 h-3.5 text-status-info-icon shrink-0" />
                 )}
-                <span>{currentUser.username || currentUser.email}</span>
+                <span className="truncate">
+                  {currentUser.username || currentUser.email}
+                </span>
               </div>
               {onLogout && (
                 <button
+                  type="button"
                   onClick={onLogout}
                   title="تسجيل الخروج"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-[#333333] transition-colors"
+                  className="p-1.5 rounded-lg text-text-muted hover:text-status-danger-text hover:bg-status-danger-bg border border-border-subtle transition-all duration-200 ease-out-expo active:scale-90"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>

@@ -77,29 +77,29 @@ export const AssignCardModal: React.FC<AssignCardModalProps> = ({
     >
       <form
         onSubmit={handleSave}
-        className="space-y-4 pt-1 text-right"
+        className="space-y-4 pt-1 text-start"
         dir="rtl"
       >
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-text-muted">
           اربط هذا الكارت بجمهور أو عميل محدد وضبط رابط التوجيه النهائي
           للتقييمات.
         </p>
 
         {/*--------------|| Readonly Card ID Display ||--------------*/}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs font-semibold text-text-secondary mb-1">
             معرف الكارت (Card ID)
           </label>
           <Input
             value={card.card_id}
             disabled
-            className="bg-slate-100 font-mono text-slate-600"
+            className="font-mono text-text-disabled"
           />
         </div>
 
         {/*--------------|| Client / Business Name Input ||--------------*/}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs font-semibold text-text-secondary mb-1">
             اسم العميل أو النشاط التجاري
           </label>
           <Input
@@ -112,7 +112,7 @@ export const AssignCardModal: React.FC<AssignCardModalProps> = ({
 
         {/*--------------|| Redirect Target URL Input ||--------------*/}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs font-semibold text-text-secondary mb-1">
             رابط التوجيه / تقييم جوجل (Target URL)
           </label>
           <Input
@@ -120,38 +120,39 @@ export const AssignCardModal: React.FC<AssignCardModalProps> = ({
             placeholder="https://g.page/r/..."
             value={targetUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetUrl(e.target.value)}
-            leftIcon={<LinkIcon className="w-4 h-4 text-slate-400" />}
+            leftIcon={<LinkIcon className="w-4 h-4" />}
             required
           />
         </div>
 
         {/*--------------|| Card Status Toggle Switch ||--------------*/}
-        <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
-          <div>
-            <span className="text-xs font-bold text-slate-800 block">
+        <div className="flex items-center justify-between gap-3 p-3 bg-surface-800/60 border border-border-subtle rounded-xl">
+          <div className="min-w-0">
+            <span className="text-xs font-bold text-text-primary block">
               حالة تفعيل الكارت
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-text-muted">
               عند مسح الكارت، سيتم توجيه العميل فوراً إلى الرابط عند التفعيل.
             </span>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
             <input
               type="checkbox"
               className="sr-only peer"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
             />
-            <div className="w-11 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            <div className="w-11 h-6 bg-surface-750 border border-border-subtle peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-text-inverse after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-text-primary after:border-surface-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-status-active-bg peer-checked:border-status-active-border" />
           </label>
         </div>
 
         {/*--------------|| Modal Actions Footer ||--------------*/}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-border-subtle">
           <Button
             type="button"
             variant="danger"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               onClose();
               onDeleteCard(card);
@@ -168,10 +169,16 @@ export const AssignCardModal: React.FC<AssignCardModalProps> = ({
               size="sm"
               onClick={onClose}
               disabled={isSubmitting}
+              className="flex-1 sm:flex-none"
             >
               إلغاء
             </Button>
-            <Button type="submit" size="sm" isLoading={isSubmitting}>
+            <Button
+              type="submit"
+              size="sm"
+              isLoading={isSubmitting}
+              className="flex-1 sm:flex-none"
+            >
               حفظ التغييرات
             </Button>
           </div>

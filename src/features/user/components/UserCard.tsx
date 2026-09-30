@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ExternalLink, Edit2, QrCode, Smartphone, Copy, Check } from "lucide-react";
+import { Edit2, QrCode, Smartphone, Copy, Check } from "lucide-react";
 import type { Card } from "../../../types/card";
 import { CardStatusBadge } from "../../cards/components/CardStatus";
 import { getShortCardUrl } from "../../../utils/url";
@@ -32,58 +32,70 @@ export const UserCard: React.FC<UserCardProps> = ({
   };
 
   return (
-    <div className="bg-[#212121] border border-[#2e2e2e] rounded-2xl p-5 space-y-4 hover:border-[#f15827]/40 transition-colors text-right" dir="rtl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-mono font-bold text-sm text-slate-100">
+    <div
+      className="surface rounded-2xl p-4 sm:p-5 space-y-4 hover:border-brand/40 hover:bg-surface-850 transition-all duration-200 ease-out-expo text-start"
+      dir="rtl"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono font-bold text-sm text-text-primary truncate">
             {card.card_id}
           </span>
           <button
             onClick={handleCopy}
-            className="p-1 hover:text-[#f15827] text-slate-400 transition-colors"
+            className="p-1 rounded-md text-text-muted hover:text-brand transition-colors"
             title="نسخ الرابط"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-status-active-icon" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
         <CardStatusBadge card={card} size="sm" />
       </div>
 
       <div className="space-y-1.5 text-xs">
-        <div className="text-slate-400">الاسم / النشاط:</div>
-        <div className="font-medium text-slate-200">
+        <div className="text-text-muted">الاسم / النشاط:</div>
+        <div className="font-medium text-text-secondary">
           {card.client_name || "غير محدد"}
         </div>
       </div>
 
       <div className="space-y-1.5 text-xs">
-        <div className="text-slate-400">رابط التوجيه (Google Reviews):</div>
+        <div className="text-text-muted">رابط التوجيه (Google Reviews):</div>
         {card.target_url ? (
           <a
             href={card.target_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#f15827] hover:underline flex items-center gap-1.5 truncate"
+            className="text-brand hover:text-brand-light transition-colors block truncate"
           >
             <span className="truncate">{card.target_url}</span>
-            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
           </a>
         ) : (
-          <span className="text-slate-500 italic">لم يتم ربط رابط توجيه بعد</span>
+          <span className="text-text-disabled italic">
+            لم يتم ربط رابط توجيه بعد
+          </span>
         )}
       </div>
 
-      <div className="pt-3 border-t border-[#2e2e2e] flex items-center justify-between text-xs">
-        <div className="text-slate-400">
-          مرات المسح: <span className="font-bold text-slate-200 font-mono">{card.scan_count || 0}</span>
+      <div className="pt-3 border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="text-text-muted">
+          مرات المسح:{" "}
+          <span className="font-bold text-text-primary font-mono">
+            {card.scan_count || 0}
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <Button
             size="sm"
             variant="ghost"
             onClick={() => onShowQR(card)}
             title="عرض كود QR"
+            aria-label={`عرض كود QR للكارت ${card.card_id}`}
           >
             <QrCode className="w-4 h-4" />
           </Button>
@@ -92,6 +104,7 @@ export const UserCard: React.FC<UserCardProps> = ({
             variant="ghost"
             onClick={() => onSimulate(card)}
             title="محاكاة مسح الكارت"
+            aria-label={`محاكاة مسح الكارت ${card.card_id}`}
           >
             <Smartphone className="w-4 h-4" />
           </Button>

@@ -118,19 +118,19 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
       title="إنشاء كروت NFC جديدة"
       maxWidth="md"
     >
-      <div className="space-y-4 pt-1 text-right" dir="rtl">
+      <div className="space-y-4 pt-1 text-start" dir="rtl">
         {modeProp === "both" && (
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+          <div className="grid grid-cols-2 gap-2 p-1 bg-surface-800/80 border border-border-subtle rounded-xl">
             <button
               type="button"
               onClick={() => {
                 setMode("single");
                 handleReset();
               }}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-150 ease-out-expo ${
                 mode === "single"
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-brand text-text-inverse shadow-2xs"
+                  : "text-text-muted hover:text-text-primary hover:bg-surface-750"
               }`}
             >
               <CreditCard className="w-4 h-4" />
@@ -142,10 +142,10 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
                 setMode("bulk");
                 handleReset();
               }}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-150 ease-out-expo ${
                 mode === "bulk"
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-brand text-text-inverse shadow-2xs"
+                  : "text-text-muted hover:text-text-primary hover:bg-surface-750"
               }`}
             >
               <Layers className="w-4 h-4" />
@@ -156,7 +156,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
 
         {/*--------------|| Error Notification Alert ||--------------//*/}
         {errorMsg && (
-          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs">
+          <div className="p-3 bg-status-danger-bg border border-status-danger-border rounded-xl text-status-danger-text text-xs">
             {errorMsg}
           </div>
         )}
@@ -177,18 +177,19 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
               autoFocus
             />
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
+            <div className="bg-surface-800/60 border border-border-subtle rounded-xl p-3 text-xs text-text-muted">
               سيتم إنشاء الكارت كـ{" "}
-              <strong className="text-slate-900">غير مخصص (Unassigned)</strong>{" "}
+              <strong className="text-text-primary">غير مخصص (Unassigned)</strong>{" "}
               حتى تقوم بربطه بعميل ورابط تقييم Google Review لاحقاً.
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-3 border-t border-border-subtle">
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 onClick={onClose}
+                className="w-full sm:w-auto"
               >
                 إلغاء
               </Button>
@@ -196,6 +197,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
                 type="submit"
                 size="sm"
                 isLoading={isSubmitting}
+                className="w-full sm:w-auto"
                 leftIcon={<PlusCircle className="w-4 h-4" />}
               >
                 إنشاء الكارت
@@ -207,7 +209,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
         {/*--------------|| Bulk Generation Mode Form ||--------------//*/}
         {mode === "bulk" && (
           <form onSubmit={handleBulkSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="بداية النطاق (Start)"
                 placeholder="CARD-100"
@@ -230,11 +232,11 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
               />
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 space-y-1">
-              <p className="font-semibold text-slate-800">
+            <div className="bg-surface-800/60 border border-border-subtle rounded-xl p-3 text-xs text-text-muted space-y-1">
+              <p className="font-semibold text-text-secondary">
                 قواعد التوليد التلقائي:
               </p>
-              <ul className="list-disc list-inside space-y-0.5 text-slate-500">
+              <ul className="list-disc list-inside space-y-0.5 text-text-muted">
                 <li>يجب أن يتطابق المقطع النصي (البادئة) في كلا الحقلين.</li>
                 <li>يتم حفظ طول الأرقام مع الأصفار المسبقة تلقائياً.</li>
                 <li>يتم تخطي أي معرف كارت موجود مسبقاً في قاعدة البيانات.</li>
@@ -242,25 +244,28 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
             </div>
 
             {bulkResult && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1">
-                <p className="font-bold text-emerald-900">نتيجة العملية:</p>
-                <p className="text-emerald-700">
+              <div className="p-3 bg-status-active-bg border border-status-active-border rounded-xl text-xs space-y-1">
+                <p className="font-bold text-status-active-text">
+                  نتيجة العملية:
+                </p>
+                <p className="text-status-active-text">
                   تم إنشاء: {bulkResult.totalCreated} كارت جديد.
                 </p>
                 {bulkResult.totalSkipped > 0 && (
-                  <p className="text-amber-700">
+                  <p className="text-status-unassigned-text">
                     تم تخطي: {bulkResult.totalSkipped} (موجودة مسبقاً).
                   </p>
                 )}
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-3 border-t border-border-subtle">
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 onClick={onClose}
+                className="w-full sm:w-auto"
               >
                 إغلاق
               </Button>
@@ -268,6 +273,7 @@ export const GenerateCardsModal: React.FC<GenerateCardsModalProps> = ({
                 type="submit"
                 size="sm"
                 isLoading={isSubmitting}
+                className="w-full sm:w-auto"
                 leftIcon={<Layers className="w-4 h-4" />}
               >
                 توليد دفعة الكروت

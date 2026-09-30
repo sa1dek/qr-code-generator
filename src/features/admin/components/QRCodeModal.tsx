@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Download, Printer, Copy, Check, ShieldAlert } from "lucide-react";
 import { Modal } from "../../../components/ui/Modal";
@@ -22,7 +22,6 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
 }) => {
   const [dataUrl, setDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { success } = useToast();
 
   const shortUrl = card ? getShortCardUrl(card.card_id) : "";
@@ -90,19 +89,19 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
         {/*--------------|| Printable Card Display Area ||--------------*/}
         <div
           id="printable-qr"
-          className="bg-white border-2 border-slate-200 rounded-2xl p-6 w-full max-w-sm flex flex-col items-center shadow-xs"
+          className="bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-6 w-full max-w-sm flex flex-col items-center shadow-xs"
         >
-          <div className="flex items-center justify-between w-full border-b border-slate-100 pb-3 mb-4">
-            <span className="text-xs font-bold text-slate-500">
+          <div className="flex items-center justify-between w-full border-b border-[#e2e8f0] pb-3 mb-4">
+            <span className="text-xs font-bold text-[#475569]">
               DYNAMIC REVIEW CARD
             </span>
-            <span className="font-mono text-xs font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md">
+            <span className="font-mono text-xs font-bold bg-[#e2e8f0] text-[#1e293b] px-2 py-0.5 rounded-md">
               {card.card_id}
             </span>
           </div>
 
           {/*--------------|| QR Image Canvas ||--------------*/}
-          <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner mb-3">
+          <div className="p-3 bg-white border border-[#e2e8f0] rounded-xl inset-shadow-sm mb-3">
             {dataUrl ? (
               <img
                 src={dataUrl}
@@ -110,44 +109,44 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                 className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
               />
             ) : (
-              <div className="w-48 h-48 sm:w-56 sm:h-56 bg-slate-50 flex items-center justify-center text-xs text-slate-400">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 bg-[#f1f5f9] flex items-center justify-center text-xs text-[#64748b]">
                 جاري توليد الرمز...
               </div>
             )}
           </div>
 
-          <p className="text-xs font-semibold text-slate-700 mb-1">
+          <p className="text-xs font-semibold text-[#334155] mb-1">
             امسح لترك تقييم على خرائط جوجل
           </p>
-          <p className="text-[11px] text-slate-400 mb-3">
+          <p className="text-[11px] text-[#64748b] mb-3">
             Scan to leave a Google Review
           </p>
 
           {/*--------------|| Permanent URL Banner ||--------------*/}
-          <div className="w-full bg-slate-50 rounded-lg p-2 border border-slate-200 text-center">
-            <span className="font-mono text-[11px] text-slate-600 break-all select-all dir-ltr block">
+          <div className="w-full bg-[#f1f5f9] rounded-lg p-2 border border-[#e2e8f0] text-center">
+            <span className="font-mono text-[11px] text-[#475569] break-all select-all dir-ltr block">
               {shortUrl}
             </span>
           </div>
 
           {card.client_name && (
-            <p className="text-xs text-slate-500 mt-2 font-medium">
+            <p className="text-xs text-[#64748b] mt-2 font-medium">
               العميل: {card.client_name}
             </p>
           )}
         </div>
 
         {/*--------------|| Dynamic Security Note ||--------------*/}
-        <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-right text-xs text-slate-600 flex items-start gap-2.5">
-          <div className="p-1 rounded-md bg-blue-100 text-blue-800 shrink-0">
+        <div className="w-full bg-status-info-bg border border-status-info-border rounded-xl p-3 text-right text-xs text-status-info-text flex items-start gap-2.5">
+          <div className="p-1 rounded-md bg-status-info-border text-status-info-icon shrink-0">
             <ShieldAlert className="w-3.5 h-3.5" />
           </div>
           <div>
-            <span className="font-bold text-slate-800">
+            <span className="font-bold text-status-info-icon">
               قاعدة الأمان الديناميكية:{" "}
             </span>
             الرابط المخزن في QR و NFC هو رابط المعرف الثابت (
-            <code className="font-mono text-slate-800">{`/r/${card.card_id}`}</code>
+            <code className="font-mono">{`/r/${card.card_id}`}</code>
             ). أي تغيير لرابط المراجعة من لوحة التحكم سيُحدث الوجهة فوراً دون
             إعادة طباعة.
           </div>
@@ -162,7 +161,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
             onClick={handleCopy}
             leftIcon={
               copied ? (
-                <Check className="w-4 h-4 text-emerald-600" />
+                <Check className="w-4 h-4 text-status-active-icon" />
               ) : (
                 <Copy className="w-4 h-4" />
               )

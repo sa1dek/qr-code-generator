@@ -213,3 +213,29 @@ export async function deleteCardApi(cardId: string) {
 
   return { ok: true, status: 200, data: { success: true } };
 }
+
+//--------------|| Unassign Card (Admin Only) ||--------------//
+export async function unassignCardApi(cardId: string) {
+  const normalizedId = cardId.trim().toUpperCase();
+  const { data, error } = await supabase
+    .from("cards")
+    .update({
+      user_id: null,
+      is_active: false,
+      client_name: null,
+      target_url: null,
+    })
+    .eq("card_id", normalizedId)
+    .select()
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      status: 400,
+      data: { success: false, error: error.message },
+    };
+  }
+
+  return { ok: true, status: 200, data: { success: true, card: data } };
+}

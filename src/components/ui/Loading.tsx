@@ -24,14 +24,14 @@ export const Loading: React.FC<LoadingProps> = ({
 }) => {
   const content = (
     <div className={cn("flex flex-col items-center justify-center gap-3 p-4", className)}>
-      <Loader2 className={cn("animate-spin text-[#f15827]", sizeClasses[size])} />
-      {text && <p className="text-sm font-medium text-slate-400">{text}</p>}
+      <Loader2 className={cn("animate-spin text-brand", sizeClasses[size])} />
+      {text && <p className="text-sm font-medium text-text-muted">{text}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#171717]/80 backdrop-blur-xs">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-medium backdrop-blur-xs">
         {content}
       </div>
     );

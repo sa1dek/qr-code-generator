@@ -38,13 +38,13 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-[300px] flex items-center justify-center p-6 text-right" dir="rtl">
-          <div className="bg-[#212121] border border-[#333333] p-6 rounded-2xl max-w-md w-full space-y-4 text-center">
-            <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto">
+        <div className="min-h-[300px] flex items-center justify-center p-4 sm:p-6 text-start" dir="rtl">
+          <div className="surface p-4 sm:p-6 rounded-2xl max-w-md w-full space-y-4 text-center">
+            <div className="w-12 h-12 bg-status-danger-bg text-status-danger-icon border border-status-danger-border rounded-full flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h2 className="text-base font-bold text-slate-100">حدث خطأ غير متوقع</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-text-primary">حدث خطأ غير متوقع</h2>
+            <p className="text-xs text-text-muted">
               {this.state.error?.message || "حدث خطأ أثناء تحميل هذا الجزء من التطبيق."}
             </p>
             <Button

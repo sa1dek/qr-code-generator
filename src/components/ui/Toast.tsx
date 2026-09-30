@@ -2,14 +2,12 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import { cn } from "../../utils/utils";
 
-//--------------|| Toast Data Types ||--------------//
 export interface ToastItem {
   id: string;
   type: "success" | "error" | "info";
   message: string;
 }
 
-//--------------|| Context Interface ||--------------//
 interface ToastContextType {
   toast: (message: string, type?: "success" | "error" | "info") => void;
   success: (message: string) => void;
@@ -17,21 +15,17 @@ interface ToastContextType {
   info: (message: string) => void;
 }
 
-//--------------|| Context Creation ||--------------//
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-//--------------|| Toast Provider Component ||--------------//
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  //--------------|| Toast Removal Handler ||--------------//
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  //--------------|| Toast Dispatcher ||--------------//
   const toast = useCallback(
     (message: string, type: "success" | "error" | "info" = "info") => {
       const id = `t-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -44,7 +38,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     [removeToast],
   );
 
-  //--------------|| Helper Trigger Functions ||--------------//
   const success = useCallback(
     (message: string) => toast(message, "success"),
     [toast],
@@ -61,38 +54,39 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ToastContext.Provider value={{ toast, success, error, info }}>
       {children}
-      {/*--------------|| Floating Toast Notifications Overlay ||--------------*/}
-      <div className="fixed bottom-5 left-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-auto sm:bottom-5 sm:left-5 z-50 flex flex-col gap-2 sm:w-full sm:max-w-sm pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}
             className={cn(
               "pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-lg text-sm transition-all duration-200 animate-in slide-in-from-bottom-2",
               t.type === "success" &&
-                "bg-emerald-950 text-emerald-100 border-emerald-800",
-              t.type === "error" && "bg-rose-950 text-rose-100 border-rose-800",
+                "bg-status-active-bg text-status-active-text border-status-active-border",
+              t.type === "error" &&
+                "bg-status-danger-bg text-status-danger-text border-status-danger-border",
               t.type === "info" &&
-                "bg-slate-900 text-slate-100 border-slate-800",
+                "bg-status-info-bg text-status-info-text border-status-info-border",
             )}
             dir="rtl"
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {t.type === "success" && (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-status-active-icon shrink-0" />
               )}
               {t.type === "error" && (
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                <AlertCircle className="w-4 h-4 text-status-danger-icon shrink-0" />
               )}
               {t.type === "info" && (
-                <Info className="w-4 h-4 text-slate-400 shrink-0" />
+                <Info className="w-4 h-4 text-status-info-icon shrink-0" />
               )}
-              <span className="font-medium text-xs sm:text-sm">
+              <span className="font-medium text-xs sm:text-sm break-words">
                 {t.message}
               </span>
             </div>
             <button
+              type="button"
               onClick={() => removeToast(t.id)}
-              className="text-slate-400 hover:text-white p-0.5 rounded transition-colors"
+              className="text-text-muted hover:text-text-primary p-0.5 rounded transition-colors shrink-0"
               aria-label="إغلاق الإشعار"
             >
               <X className="w-3.5 h-3.5" />
@@ -104,7 +98,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-//--------------|| Custom Hook ||--------------//
 export function useToast(): ToastContextType {
   const context = useContext(ToastContext);
   if (!context) {

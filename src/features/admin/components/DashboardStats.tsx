@@ -2,18 +2,15 @@ import React from "react";
 import { CreditCard, CheckCircle2, AlertTriangle, QrCode } from "lucide-react";
 import type { DashboardStats as StatsType } from "../../../types/card";
 
-//--------------|| Component Props Interface ||--------------//
 interface DashboardStatsProps {
   stats: StatsType | null;
   isLoading: boolean;
 }
 
-//--------------|| Dashboard Stats Component ||--------------//
 export const DashboardStats: React.FC<DashboardStatsProps> = ({
   stats,
   isLoading,
 }) => {
-  //--------------|| Statistics Configuration ||--------------//
   const items = [
     {
       id: "stat-total-cards",
@@ -21,8 +18,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       sublabel: "Total Cards",
       value: stats?.totalCards ?? 0,
       icon: CreditCard,
-      color: "text-slate-900",
-      bgColor: "bg-slate-100",
+      color: "text-brand",
+      bgColor: "bg-brand/10",
+      borderColor: "border-brand/20",
     },
     {
       id: "stat-active-cards",
@@ -30,8 +28,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       sublabel: "Active Cards",
       value: stats?.activeCards ?? 0,
       icon: CheckCircle2,
-      color: "text-emerald-700",
-      bgColor: "bg-emerald-50",
+      color: "text-status-active-icon",
+      bgColor: "bg-status-active-bg",
+      borderColor: "border-status-active-border",
     },
     {
       id: "stat-unassigned-cards",
@@ -39,8 +38,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       sublabel: "Unassigned",
       value: stats?.unassignedCards ?? 0,
       icon: AlertTriangle,
-      color: "text-amber-700",
-      bgColor: "bg-amber-50",
+      color: "text-status-unassigned-icon",
+      bgColor: "bg-status-unassigned-bg",
+      borderColor: "border-status-unassigned-border",
     },
     {
       id: "stat-total-scans",
@@ -48,43 +48,42 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       sublabel: "Total Scans",
       value: stats?.totalScans ?? 0,
       icon: QrCode,
-      color: "text-indigo-700",
-      bgColor: "bg-indigo-50",
+      color: "text-status-info-icon",
+      bgColor: "bg-status-info-bg",
+      borderColor: "border-status-info-border",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" dir="rtl">
       {items.map((item) => {
         const IconComponent = item.icon;
         return (
           <div
             id={item.id}
             key={item.id}
-            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors"
+            className="surface rounded-2xl p-4 sm:p-5 shadow-2xs hover:border-border-secondary transition-colors min-w-0"
           >
-            {/*--------------|| Stat Header & Icon ||--------------*/}
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <span className="text-xs font-semibold text-slate-500">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="text-xs font-semibold text-text-muted truncate">
                 {item.label}
               </span>
               <div
-                className={`w-8 h-8 rounded-lg ${item.bgColor} flex items-center justify-center shrink-0`}
+                className={`w-8 h-8 rounded-lg ${item.bgColor} ${item.borderColor} flex items-center justify-center shrink-0`}
               >
                 <IconComponent className={`w-4 h-4 ${item.color}`} />
               </div>
             </div>
 
-            {/*--------------|| Stat Value & Sublabel ||--------------*/}
             <div className="flex items-baseline justify-between gap-2">
               {isLoading ? (
-                <div className="h-8 w-20 bg-slate-100 rounded-lg animate-pulse" />
+                <div className="h-8 w-20 bg-surface-800 rounded-lg animate-pulse" />
               ) : (
-                <span className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-mono">
+                <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-text-primary font-mono truncate">
                   {item.value.toLocaleString()}
                 </span>
               )}
-              <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+              <span className="text-[11px] text-text-muted font-medium hidden sm:inline">
                 {item.sublabel}
               </span>
             </div>

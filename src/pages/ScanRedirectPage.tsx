@@ -61,18 +61,21 @@ export const ScanRedirectPage: React.FC = () => {
   }, [cardId]);
 
   return (
-    <div className="min-h-screen bg-[#171717] text-white flex flex-col items-center justify-center p-4 text-center" dir="rtl">
+    <div
+      className="min-h-screen bg-bg-primary text-text-primary flex flex-col items-center justify-center p-4 text-center"
+      dir="rtl"
+    >
       {redirectError ? (
-        <div className="bg-[#212121] border border-[#333333] p-6 sm:p-8 rounded-2xl max-w-sm w-full space-y-4 shadow-xl">
-          <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+        <div className="surface rounded-2xl p-6 sm:p-8 max-w-sm w-full space-y-4 shadow-lg">
+          <div className="w-12 h-12 bg-status-danger-bg text-status-danger-icon border border-status-danger-border rounded-full flex items-center justify-center mx-auto text-xl font-bold">
             !
           </div>
-          <h2 className="text-lg font-bold text-slate-100">تعذر التوجيه</h2>
-          <p className="text-sm text-slate-400">{redirectError}</p>
+          <h2 className="text-lg font-bold text-text-primary">تعذر التوجيه</h2>
+          <p className="text-sm text-text-muted">{redirectError}</p>
           <div className="pt-2">
             <button
               onClick={() => (window.location.href = "/")}
-              className="text-xs text-[#f15827] hover:underline"
+              className="text-xs font-semibold text-brand hover:text-brand-light transition-colors"
             >
               الذهاب إلى الصفحة الرئيسية
             </button>
@@ -80,9 +83,9 @@ export const ScanRedirectPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="w-12 h-12 border-4 border-[#f15827] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-300 font-medium">
-            جاري توجيهك إلى صفحة التقييم...
+          <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-text-secondary font-medium">
+            جاري التوجيه...
           </p>
         </div>
       )}

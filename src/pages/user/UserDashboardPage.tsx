@@ -106,7 +106,7 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900" dir="rtl">
+    <div className="min-h-screen bg-bg-primary text-text-primary overflow-x-hidden" dir="rtl">
       <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
@@ -119,27 +119,25 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
       />
 
       <div className="md:mr-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-10 bg-surface-900/90 backdrop-blur-md border-b border-border-subtle px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="md:hidden p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+              className="md:hidden p-2 shrink-0 rounded-xl border border-border-subtle text-text-secondary hover:bg-surface-800 hover:border-brand/40 transition-all duration-200 ease-out-expo active:scale-90"
               aria-label="فتح القائمة"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900">
-                {currentTab === "dashboard" && "لوحة التحكم"}
-                {currentTab === "my-cards" && "كروتي"}
-                {currentTab === "docs" && "دليل الاستخدام والبرمجة"}
-              </h1>
-            </div>
+            <h1 className="text-sm sm:text-base lg:text-lg font-bold text-text-primary truncate">
+              {currentTab === "dashboard" && "لوحة التحكم"}
+              {currentTab === "my-cards" && "كروتي"}
+              {currentTab === "docs" && "دليل الاستخدام والبرمجة"}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               size="sm"
               onClick={() => setIsCreateModalOpen(true)}
@@ -158,7 +156,7 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-slate-900">
+                  <h2 className="text-base font-bold text-text-primary">
                     قائمة كروتك
                   </h2>
                 </div>
@@ -184,18 +182,19 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
 
           {currentTab === "my-cards" && (
             <div className="space-y-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">
+              <div className="surface-elevated p-4 sm:p-5 rounded-2xl shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold text-text-primary">
                     إدارة كروتك
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     أضف كروت جديدة، وخصص روابط التقييم، وولّد رموز QR مخصصة.
                   </p>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full sm:w-auto shrink-0"
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
                   إضافة كارت جديد

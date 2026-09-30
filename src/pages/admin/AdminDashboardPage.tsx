@@ -19,16 +19,15 @@ import type {
   DashboardStats as StatsType,
 } from "../../types/card";
 import { useToast } from "../../components/ui/Toast";
-import { getCardsApi, deleteCardApi } from "../../utils/fetchUtils";
+import { deleteCardApi, unassignCardApi } from "../../utils/fetchUtils";
+import { getAdminOnlyCards, getAdminDashboardStats } from "../../features/admin/services/adminService";
 
-//--------------|| Component Props Interface ||--------------//
 interface AdminDashboardPageProps {
   onLogout: () => void;
   dbMode: "supabase" | "mock";
   currentUser?: AuthUser | null;
 }
 
-//--------------|| Admin Dashboard Page Component ||--------------//
 export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onLogout,
   dbMode,
@@ -37,14 +36,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [currentTab, setCurrentTab] = useState<AdminTab>("dashboard");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  //--------------|| Data States ||--------------//
   const [cards, setCards] = useState<Card[]>([]);
   const [stats, setStats] = useState<StatsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
-  //--------------|| Modal Visibility States ||--------------//
   const [selectedCardForEdit, setSelectedCardForEdit] = useState<Card | null>(
     null,
   );
@@ -58,59 +55,28 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   const { success, error } = useToast();
 
-  //--------------|| Fetch Data Handler ||--------------//
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await getCardsApi(currentUser);
+      const [fetchedCards, fetchedStats] = await Promise.all([
+        getAdminOnlyCards(),
+        getAdminDashboardStats(),
+      ]);
 
-      if (res.ok && res.data?.cards) {
-        const fetchedCards = res.data.cards;
-
-        // 👇 استبدل الفلترة القديمة بهذه الصياغة الدقيقة لتصفية كروت الأدمن الشخصية فقط وتجاهل كروت المستخدمين
-        const adminCards = fetchedCards.filter(
-          (c: any) => !c.user_id || c.user_id === currentUser?.id,
-        );
-        setCards(adminCards);
-
-        //--------------|| Calculate Statistics (لأدمن النظام فقط) ||--------------//
-        const totalCards = adminCards.length;
-        const activeCards = adminCards.filter(
-          (c: Card) => c.is_active && c.client_name,
-        ).length;
-        const unassignedCards = adminCards.filter((c: Card) => !c.client_name).length;
-        const inactiveCards = adminCards.filter(
-          (c: Card) => !c.is_active && c.client_name,
-        ).length;
-        const totalScans = adminCards.reduce(
-          (acc: number, c: Card) => acc + (c.scan_count || 0),
-          0,
-        );
-
-        setStats({
-          totalCards,
-          activeCards,
-          unassignedCards,
-          inactiveCards,
-          totalScans,
-          recentScans: [],
-        } as unknown as StatsType);
-      } else {
-        error(res.data?.error || "تعذر جلب البيانات من الخادم");
-      }
+      setCards(fetchedCards);
+      setStats(fetchedStats);
     } catch (err: any) {
       console.error("Failed to fetch data:", err);
       error("تعذر جلب البيانات من الخادم");
     } finally {
       setIsLoading(false);
     }
-  }, [error, currentUser, searchQuery, activeFilter]);
+  }, [error]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  //--------------|| Card Deletion Handler ||--------------//
   const handleConfirmDelete = async (cardId: string) => {
     try {
       const res = await deleteCardApi(cardId);
@@ -129,7 +95,32 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
   };
 
-  //--------------|| Card Update Handler ||--------------//
+  const handleUnassignCard = async (card: Card) => {
+    if (!window.confirm(`هل تريد إلغاء تعيين الكارت ${card.card_id} وإعادته للمخزون؟`)) {
+      return;
+    }
+
+    try {
+      const res = await unassignCardApi(card.card_id);
+      if (!res.ok) {
+        throw new Error(res.data?.error || "تعذر إلغاء تعيين الكارت");
+      }
+
+      setCards((prev) =>
+        prev.map((c) =>
+          c.card_id === card.card_id
+            ? { ...c, user_id: null, is_active: false, client_name: null, target_url: null }
+            : c,
+        ),
+      );
+      success(`تم إلغاء تعيين الكارت ${card.card_id} بنجاح`);
+      fetchData();
+    } catch (err: any) {
+      error(err.message || "حدث خطأ أثناء إلغاء التعيين");
+      throw err;
+    }
+  };
+
   const handleCardUpdated = (updatedCard: Card) => {
     setCards((prev) =>
       prev.map((c) => (c.card_id === updatedCard.card_id ? updatedCard : c)),
@@ -137,7 +128,6 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     fetchData();
   };
 
-  //--------------|| Filter Cards Logic ||--------------//
   const filteredCards = cards.filter((card) => {
     const matchesSearch =
       card.card_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -154,8 +144,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900" dir="rtl">
-      {/*--------------|| Sidebar Navigation ||--------------*/}
+    <div className="min-h-screen bg-bg-primary text-text-primary overflow-x-hidden" dir="rtl">
       <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
@@ -166,32 +155,29 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         currentUser={currentUser}
       />
 
-      {/*--------------|| Main Content Area ||--------------*/}
       <div className="md:mr-64 flex flex-col min-h-screen">
-        {/*--------------|| Top Navbar Header ||--------------*/}
-        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-10 bg-surface-900/90 backdrop-blur-md border-b border-border-subtle px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="md:hidden p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+              className="md:hidden p-2 shrink-0 rounded-xl border border-border-subtle text-text-secondary hover:bg-surface-800 hover:border-brand/40 transition-all duration-200 ease-out-expo active:scale-90"
               aria-label="فتح القائمة"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900">
-                {currentTab === "dashboard" && "لوحة التحكم الرئيسية"}
-                {currentTab === "cards" && "إدارة كروت NFC & QR"}
-                {currentTab === "user-cards" && "كروت المستخدمين"}
-                {currentTab === "analytics" && "تحليلات المسح والزيارات"}
-                {currentTab === "docs" && "دليل الاستخدام والبرمجة"}
-              </h1>
-            </div>
+            <h1 className="text-sm sm:text-base lg:text-lg font-bold text-text-primary truncate">
+              {currentTab === "dashboard" && "لوحة التحكم الرئيسية"}
+              {currentTab === "cards" && "إدارة كروت NFC & QR"}
+              {currentTab === "user-cards" && "كروت المستخدمين"}
+              {currentTab === "users-management" && "إدارة المستخدمين والصلاحيات"}
+              {currentTab === "analytics" && "تحليلات المسح والزيارات"}
+              {currentTab === "docs" && "دليل الاستخدام والبرمجة"}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               size="sm"
               onClick={() => setIsCreateModalOpen(true)}
@@ -203,16 +189,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </div>
         </header>
 
-        {/*--------------|| Main Tab Views ||--------------*/}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full">
-          {/*--------------|| Dashboard Overview Tab ||--------------*/}
           {currentTab === "dashboard" && (
             <div className="space-y-6">
               <DashboardStats stats={stats} isLoading={isLoading} />
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-slate-900">
+                  <h2 className="text-base font-bold text-text-primary">
                     قائمة الكروت الديناميكية
                   </h2>
                 </div>
@@ -228,6 +212,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   onEditCard={setSelectedCardForEdit}
                   onShowQR={setSelectedCardForQR}
                   onDeleteCard={(card) => setSelectedCardForDelete(card)}
+                  onUnassignCard={handleUnassignCard}
                   onSimulateScan={setSelectedCardForSim}
                   onRefresh={fetchData}
                 />
@@ -235,15 +220,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
           )}
 
-          {/*--------------|| Dedicated Cards Manager Tab ||--------------*/}
           {currentTab === "cards" && (
             <div className="space-y-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">
+              <div className="surface-elevated p-4 sm:p-5 rounded-2xl shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold text-text-primary">
                     إدارة وبرمجة الكروت
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     قم بتخصيص روابط التقييم، وتوليد كروت جديدة، وتنزيل رموز QR
                     المخصصة.
                   </p>
@@ -251,6 +235,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <Button
                   size="sm"
                   onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full sm:w-auto shrink-0"
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
                   إضافة كروت جديدة
@@ -268,13 +253,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 onEditCard={setSelectedCardForEdit}
                 onShowQR={setSelectedCardForQR}
                 onDeleteCard={(card) => setSelectedCardForDelete(card)}
+                onUnassignCard={handleUnassignCard}
                 onSimulateScan={setSelectedCardForSim}
                 onRefresh={fetchData}
               />
             </div>
           )}
 
-          {/*--------------|| User Cards Dedicated Tab ||--------------*/}
           {currentTab === "user-cards" && (
             <AdminUserCardsPage
               onShowQR={setSelectedCardForQR}
@@ -284,7 +269,6 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {currentTab === "users-management" && <UsersManagementPage />}
 
-          {/*--------------|| Scan Analytics Tab ||--------------*/}
           {currentTab === "analytics" && (
             <AnalyticsView
               cards={cards}
@@ -294,12 +278,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             />
           )}
 
-          {/*--------------|| Documentation Guide Tab ||--------------*/}
           {currentTab === "docs" && <DocsView />}
         </main>
       </div>
 
-      {/*--------------|| Application Modals ||--------------*/}
       <AssignCardModal
         card={selectedCardForEdit}
         isOpen={Boolean(selectedCardForEdit)}

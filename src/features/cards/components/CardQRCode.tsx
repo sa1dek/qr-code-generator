@@ -66,10 +66,10 @@ export const CardQRCode: React.FC<CardQRCodeProps> = ({
       </div>
 
       <div className="space-y-1">
-        <span className="font-mono font-bold text-sm text-slate-100 block">
+        <span className="font-mono font-bold text-sm text-text-primary block">
           {card.card_id}
         </span>
-        <span className="text-[11px] text-slate-400 font-mono break-all max-w-[240px] block">
+        <span className="text-[11px] text-text-muted font-mono break-all max-w-[240px] block">
           {shortUrl}
         </span>
       </div>

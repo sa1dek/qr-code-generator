@@ -27,13 +27,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (requiredRole && user.role !== requiredRole && user.role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#171717] flex items-center justify-center p-4 text-right" dir="rtl">
-        <div className="bg-[#212121] border border-[#333333] p-8 rounded-2xl max-w-md w-full space-y-4 text-center">
-          <div className="w-14 h-14 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto">
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 text-start" dir="rtl">
+        <div className="surface p-8 rounded-2xl max-w-md w-full space-y-4 text-center">
+          <div className="w-14 h-14 bg-status-danger-bg text-status-danger-icon border border-status-danger-border rounded-full flex items-center justify-center mx-auto">
             <ShieldAlert className="w-7 h-7" />
           </div>
-          <h2 className="text-lg font-bold text-slate-100">غير مصرح لك بالوصول</h2>
-          <p className="text-sm text-slate-400">
+          <h2 className="text-lg font-bold text-text-primary">غير مصرح لك بالوصول</h2>
+          <p className="text-sm text-text-muted">
             هذه الصفحة تتطلب صلاحيات خاصة ({requiredRole}). حسابك الحالي لا يمتلك الصلاحية المطلوبة.
           </p>
           <div className="pt-2 flex justify-center gap-3">

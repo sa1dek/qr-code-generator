@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardStats } from "../../../types";
-import { getAdminMetrics } from "../services/adminService";
+import { getAdminDashboardStats } from "../services/adminService";
 import { useToast } from "../../../components/ui/Toast";
 
 export function useAdminStats() {
@@ -11,7 +11,7 @@ export function useAdminStats() {
   const fetchStats = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getAdminMetrics();
+      const data = await getAdminDashboardStats();
       setStats(data);
     } catch (err: any) {
       toastError(err?.message || "فشل في جلب الإحصائيات");

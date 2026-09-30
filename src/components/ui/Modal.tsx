@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "../../utils/utils";
 
-//--------------|| Component Props Interface ||--------------//
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,7 +11,6 @@ export interface ModalProps {
   maxWidth?: "sm" | "md" | "lg" | "xl";
 }
 
-//--------------|| Modal Component ||--------------//
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -21,28 +19,22 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = "md",
 }) => {
-  //--------------|| Keyboard Listeners & Body Scroll Lock ||--------------//
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  //--------------|| Max Width Utility Classes ||--------------//
   const maxWidthClasses = {
     sm: "max-w-sm",
     md: "max-w-md",
@@ -54,39 +46,37 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 sm:p-6 overflow-y-auto overscroll-contain"
     >
-      {/*--------------|| Backdrop Overlay ||--------------*/}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        aria-hidden="true"
+        className="fixed inset-0 bg-overlay-medium backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
       />
 
-      {/*--------------|| Dialog Content Container ||--------------*/}
       <div
         className={cn(
-          "relative w-full bg-white rounded-2xl shadow-xl border border-slate-200 p-6 z-10 text-right overflow-hidden transition-all animate-in zoom-in-95 duration-200",
+          "relative w-full bg-surface-900 rounded-t-2xl sm:rounded-2xl shadow-lg border border-border-subtle p-4 sm:p-6 z-10 text-start overflow-hidden animate-in zoom-in-95 duration-200",
+          "max-h-[92dvh] sm:max-h-[85dvh] overflow-y-auto",
           maxWidthClasses[maxWidth],
         )}
       >
-        {/*--------------|| Modal Header & Close Action ||--------------*/}
-        <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100 mb-5">
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-border-subtle mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-text-primary">{title}</h2>
+            {description && (
+              <p className="text-xs text-text-muted mt-1">{description}</p>
+            )}
+          </div>
           <button
             onClick={onClose}
             aria-label="إغلاق النافذة"
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-800 transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-            {description && (
-              <p className="text-xs text-slate-500 mt-1">{description}</p>
-            )}
-          </div>
         </div>
 
-        {/*--------------|| Modal Body Content ||--------------*/}
         <div>{children}</div>
       </div>
     </div>

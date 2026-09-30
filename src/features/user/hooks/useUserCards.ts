@@ -21,7 +21,7 @@ export function useUserCards() {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, toastError]);
+  }, [user, toastError]);
 
   useEffect(() => {
     fetchCards();

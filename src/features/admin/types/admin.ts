@@ -1,4 +1,4 @@
-import type { Card, DashboardStats, UserProfile } from "../../../types";
+import type { DashboardStats, UserProfile } from "../../../types";
 
 export interface AdminStatsState {
   stats: DashboardStats | null;

@@ -1,11 +1,59 @@
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../tailwind.config.js";
+
+/* Tailwind v4 native theme entries that the legacy JS config bridge does not map */
+@theme {
+  --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --inset-shadow: inset 0 1px 2px rgb(2 6 23 / 0.4);
+  --inset-shadow-sm: inset 0 2px 4px rgb(2 6 23 / 0.45);
+}
 
 @layer base {
+  :root {
+    --color-bg-primary: #090d16;
+    --color-bg-secondary: #0f172a;
+    --color-bg-tertiary: #1e293b;
+    --color-bg-hover: #263244;
+    --color-border-primary: #334155;
+    --color-border-secondary: #475569;
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-text-disabled: #64748b;
+    --color-text-on-accent: #fff1f2;
+    --color-brand: #f15827;
+    --color-brand-light: #ff6b3a;
+    --color-brand-hover: #e04d1f;
+    --color-brand-muted: rgba(241, 88, 39, 0.2);
+    --color-danger: #e11d48;
+    --color-danger-hover: #be123c;
+    --color-success: #059669;
+    --color-success-hover: #047857;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 14px;
+    --radius-2xl: 16px;
+    --shadow-2xs: 0 1px 2px 0 rgb(23 23 23 / 0.4);
+    --shadow-xs:
+      0 1px 3px 0 rgb(23 23 23 / 0.44), 0 1px 2px -1px rgb(2 6 23 / 0.32);
+    --shadow-sm:
+      0 3px 6px -1px rgb(23 23 23 / 0.48), 0 2px 4px -2px rgb(2 6 23 / 0.32);
+    --shadow-md:
+      0 6px 12px -2px rgb(23 23 23 / 0.52), 0 3px 7px -3px rgb(2 6 23 / 0.36);
+    --shadow-lg:
+      0 20px 25px -5px rgb(23 23 23 / 0.6), 0 8px 10px -6px rgb(2 6 23 / 0.4);
+  }
+
+  * {
+    border-color: var(--color-border-primary);
+  }
+
   body {
     font-family:
       "Cairo",
@@ -17,132 +65,256 @@
       Roboto,
       Oxygen,
       sans-serif;
-    background-color: #171717 !important;
-    color: #f5f5f5 !important;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
   }
+
   code,
   pre,
   .font-mono {
     font-family: "JetBrains Mono", monospace;
   }
+
+  ::selection {
+    background-color: var(--color-brand-muted);
+    color: var(--color-text-primary);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-primary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-primary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-secondary);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--color-bg-primary);
+  }
 }
 
-/*--------------|| Toggle Switch & Dark Theme Fixes ||--------------*/
+@layer components {
+  .surface {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+  }
+
+  .surface-elevated {
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+  }
+
+  .surface-hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  .border-subtle {
+    border-color: var(--color-border-primary);
+  }
+
+  .border-muted {
+    border-color: var(--color-border-secondary);
+  }
+
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .text-disabled {
+    color: var(--color-text-disabled);
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-2 focus:ring-offset-surface-900;
+  }
+
+  .transition-smooth {
+    @apply transition-all duration-200 ease-out-expo;
+  }
+
+  .transition-quick {
+    @apply transition-all duration-150 ease-out-expo;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-in {
+    animation: animateIn 0.2s ease-out-expo;
+  }
+
+  .animate-out {
+    animation: animateOut 0.15s ease-in-expo;
+  }
+
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes animateOut {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(4px);
+    }
+  }
+
+  .slide-in-from-bottom {
+    animation: slideInFromBottom 0.25s ease-out-expo;
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-in-from-top {
+    animation: slideInFromTop 0.25s ease-out-expo;
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .zoom-in-95 {
+    animation: zoomIn95 0.2s ease-out-expo;
+  }
+
+  @keyframes zoomIn95 {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .screen-in-forward {
+    animation: screenInForward 0.32s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  @keyframes screenInForward {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .screen-in-back {
+    animation: screenInBack 0.32s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  @keyframes screenInBack {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .pulse-soft {
+    animation: pulseSoft 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseSoft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+}
+
+/* Toggle Switch Styles */
 button[role="switch"],
-.peer\:checked ~ div,
+.peer-checked ~ div,
 .peer ~ div {
-  background-color: #2a2a2a !important;
-  border-color: #383838 !important;
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-primary);
 }
 
 button[role="switch"][data-state="checked"],
 button[role="switch"][aria-checked="true"] {
-  background-color: #f15827 !important;
+  background-color: var(--color-brand);
 }
 
 button[role="switch"]:hover {
-  background-color: #333333 !important;
+  background-color: var(--color-bg-hover);
 }
 
-/*--------------|| Component Border Radius ||--------------*/
-button,
-.rounded-xl,
-.rounded-2xl,
-.rounded-lg,
-.rounded-full {
-  border-radius: 8px !important;
+button[role="switch"][data-state="checked"]:hover {
+  background-color: var(--color-brand-hover);
 }
 
-/*--------------|| Surface Backgrounds Override ||--------------*/
-header,
-nav,
-.bg-white,
-.bg-slate-50,
-.bg-slate-100 {
-  background-color: #212121 !important;
-  color: #f5f5f5 !important;
-}
-
-/*--------------|| Form Controls & Inputs ||--------------*/
-input,
-input[type="text"],
-input[type="url"],
-select,
-textarea {
-  background-color: #171717 !important;
-  color: #f5f5f5 !important;
-  border: 1px solid #2e2e2e !important;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #f15827 !important;
-  outline: none !important;
-}
-
-input::placeholder {
-  color: #737373 !important;
-}
-
-/*--------------|| Statistics Cards & Icons ||--------------*/
-.bg-indigo-50,
-.bg-blue-50,
-.bg-amber-50,
-.bg-emerald-50 {
-  background-color: #171717 !important;
-  border: 1px solid #2e2e2e !important;
-}
-
-/*--------------|| Dark Hover Fix for Tables & Rows ||--------------*/
-.bg-slate-100\/90 {
-  background-color: #171717 !important;
-  border: 1px solid #2e2e2e !important;
-}
-
-thead tr,
-tr.bg-slate-50\/70,
-.bg-slate-50\/70 {
-  background-color: #1a1a1a !important;
-}
-
-/* إصلاح الـ Hover ليكون داكن وبسيط ويوضح الكلام */
-tr:hover,
-tbody tr:hover,
-.hover\:bg-slate-50:hover,
-.hover\:bg-slate-50\/80:hover {
-  background-color: #2d2d2d !important;
-}
-
-/*--------------|| Borders & Typography Colors ||--------------*/
-.border,
-.border-slate-100,
-.border-slate-200,
-.border-slate-200\/80,
-.border-slate-200\/70,
-.divide-slate-100 > * + * {
-  border-color: #2e2e2e !important;
-}
-
-.text-slate-900,
-.text-slate-800,
-.text-slate-700,
-.text-slate-600 {
-  color: #f5f5f5 !important;
-}
-
-.text-slate-500,
-.text-slate-400 {
-  color: #a3a3a3 !important;
-}
-
-.bg-slate-900,
-.bg-blue-600 {
-  background-color: #f15827 !important;
-  color: #ffffff !important;
-}
-
-/*--------------|| Print Styles ||--------------*/
+/* Print Styles */
 @media print {
   body * {
     visibility: hidden;

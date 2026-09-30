@@ -37,14 +37,14 @@ export const UserCardsList: React.FC<UserCardsListProps> = ({
   });
 
   return (
-    <div className="space-y-5 text-right" dir="rtl">
+    <div className="space-y-5 text-start" dir="rtl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="w-full sm:w-80">
           <Input
             placeholder="بحث في كروتك..."
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
+            leftIcon={<Search className="w-4 h-4" />}
           />
         </div>
 
@@ -65,7 +65,7 @@ export const UserCardsList: React.FC<UserCardsListProps> = ({
         </div>
       ) : filteredCards.length === 0 ? (
         <EmptyState
-          icon={<CreditCard className="w-8 h-8 text-[#f15827]" />}
+          icon={<CreditCard className="w-8 h-8 text-brand" />}
           title={search ? "لا توجد نتائج بحث" : "لا توجد كروت مربوطة بحسابك"}
           description={
             search

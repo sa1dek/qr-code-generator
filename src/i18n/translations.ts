@@ -9,20 +9,48 @@ export const translations = {
     login: "تسجيل الدخول",
     subtitle: "نظام كروت NFC و QR التفاعلية",
 
-    //--------------|| Hero Section ||--------------//
-    instantRedirect: "توجيه فوري بدون إعادة برمجية الكارت",
+//--------------|| Hero Section ||--------------//
     heroTitle: "Dynamic Review Cards",
     heroDesc:
       "اربط كروت التقييم الثابتة بروالمتغيرة Google Review في أي وقت، دون الحاجة لإعادة طباعة الكارت أو برمجته مجدداً.",
     goToDashboard: "الدخول إلى لوحة التحكم",
-    testActiveCard: "تجربة مسح كارت نشط (/r/CARD-001)",
+    createAccount: "إنشاء حساب جديد",
 
-    //--------------|| Quick Redirect Tester ||--------------//
-    testerTitle: "تجربة فاحص الروابط الديناميكية (Quick Redirect Tester)",
-    testerDesc:
-      "جرب كتابة أي معرف كارت لمعرفة كيفية استجابة النظام (نشط، غير مخصص، أو غير موجود):",
-    testButton: "اختبار التوجيه",
-    quickSamples: "نماذج سريعة:",
+    //--------------|| Live Demo Simulator ||--------------//
+    demoTitle: "شاهد ماذا يحدث عند مسح الكارت",
+    demoDesc:
+      "اختر إحدى الوجهات بالأسفل، وسيتغيّر محتوى شاشة الهاتف مباشرة كما يراه العميل.",
+    demoActionLabel: "ما يفعله الكارت عند المس",
+    demoInstagram: "حساب الإنستغرام (Instagram)",
+    demoWhatsapp: "محادثة الواتساب (WhatsApp)",
+    demoBioLink: "صفحة روابط مخصصة (Custom Bio Link)",
+    demoActionInstagram: "يفتح حساب @sadeq.cafe مباشرة على تطبيق إنستغرام",
+    demoActionWhatsapp:
+      "يفتح محادثة واتساب مباشرة مع رقم الكارت لتأكيد الحجز فوراً",
+    demoActionBio: "يفتح صفحة الروابط المخصصة التي تجمع كل قنوات التواصل",
+    demoTapHint: "المس البطاقة",
+    demoCardTag: "كارت NFC ديناميكي",
+    demoCta: "ابدأ الآن وأنظّم كروتك",
+
+    //--------------|| Simulator: Instagram screen ||--------------//
+    demoIgBio: "قهوة مختصة • الرياض",
+    demoIgPosts: "منشور",
+    demoIgFollowers: "متابع",
+    demoIgFollowing: "يتابع",
+    demoIgFollow: "متابعة",
+
+    //--------------|| Simulator: WhatsApp screen ||--------------//
+    demoWaName: "مقهى سَعد",
+    demoWaOnline: "متصل الآن",
+    demoWaMsg1: "أهلاً بك! كيف نساعدك اليوم؟",
+    demoWaMsg2: "أود حجز طاولة لشخصين",
+    demoWaPlaceholder: "اكتب رسالة...",
+
+    //--------------|| Simulator: Bio link screen ||--------------//
+    demoBioTitle: "روابطنا الرسمية",
+    demoBioMenu: "قائمة الطعام",
+    demoBioReserve: "احجز طاولة",
+    demoBioReviews: "تقييمات العملاء",
 
     //--------------|| Features Grid ||--------------//
     nfcSupportTitle: "دعم كامل لـ NFC",
@@ -42,19 +70,47 @@ export const translations = {
     subtitle: "Interactive NFC & QR Review System",
 
     //--------------|| Hero Section ||--------------//
-    instantRedirect: "Instant Redirect Without Reprogramming",
     heroTitle: "Dynamic Review Cards",
     heroDesc:
       "Link fixed review cards to dynamic Google Review URLs at any time, without reprint or reprogramming.",
     goToDashboard: "Go to Dashboard",
-    testActiveCard: "Test Active Card (/r/CARD-001)",
+    createAccount: "Create a new account",
 
-    //--------------|| Quick Redirect Tester ||--------------//
-    testerTitle: "Quick Redirect Tester",
-    testerDesc:
-      "Enter any card ID to test system response (Active, Unassigned, or Not Found):",
-    testButton: "Test Redirect",
-    quickSamples: "Quick Samples:",
+    //--------------|| Live Demo Simulator ||--------------//
+    demoTitle: "See what happens when the card is tapped",
+    demoDesc:
+      "Pick a destination below and the phone screen updates instantly, exactly as the customer sees it.",
+    demoActionLabel: "What the card does on tap",
+    demoInstagram: "Instagram profile",
+    demoWhatsapp: "WhatsApp chat",
+    demoBioLink: "Custom bio link page",
+    demoActionInstagram: "Opens @sadeq.cafe directly in the Instagram app",
+    demoActionWhatsapp:
+      "Opens a direct WhatsApp chat with the card's number to confirm a booking",
+    demoActionBio: "Opens the custom bio page that gathers every contact channel",
+    demoTapHint: "Tap the card",
+    demoCardTag: "Dynamic NFC Card",
+    demoCta: "Start now and organize your cards",
+
+    //--------------|| Simulator: Instagram screen ||--------------//
+    demoIgBio: "Specialty coffee • Riyadh",
+    demoIgPosts: "posts",
+    demoIgFollowers: "followers",
+    demoIgFollowing: "following",
+    demoIgFollow: "Follow",
+
+    //--------------|| Simulator: WhatsApp screen ||--------------//
+    demoWaName: "Saad Coffee",
+    demoWaOnline: "online",
+    demoWaMsg1: "Hi there! How can we help?",
+    demoWaMsg2: "I'd like to book a table for two",
+    demoWaPlaceholder: "Type a message",
+
+    //--------------|| Simulator: Bio link screen ||--------------//
+    demoBioTitle: "Our official links",
+    demoBioMenu: "Menu",
+    demoBioReserve: "Book a table",
+    demoBioReviews: "Customer reviews",
 
     //--------------|| Features Grid ||--------------//
     nfcSupportTitle: "Full NFC Support",

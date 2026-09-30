@@ -23,16 +23,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border border-dashed border-[#333333] bg-[#1e1e1e]/40",
+        "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border border-dashed border-border-muted bg-surface-850/40",
         className,
       )}
     >
-      <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-400 mb-4 border border-slate-700/50">
+      <div className="w-14 h-14 rounded-2xl bg-surface-800 border border-border-subtle flex items-center justify-center text-text-muted mb-4">
         {icon || <FolderOpen className="w-7 h-7" />}
       </div>
-      <h3 className="text-base font-bold text-slate-200">{title}</h3>
+      <h3 className="text-base font-bold text-text-primary">{title}</h3>
       {description && (
-        <p className="text-xs sm:text-sm text-slate-400 max-w-sm mt-1.5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-text-muted max-w-sm mt-1.5 leading-relaxed">
           {description}
         </p>
       )}

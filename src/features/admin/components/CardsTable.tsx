@@ -5,18 +5,19 @@ import {
   RefreshCw,
   QrCode,
   Copy,
-  ExternalLink,
   Edit2,
   Trash2,
   Check,
   Eye,
   User,
+  UserMinus,
 } from "lucide-react";
-import { Card, getCardStatus } from "../../../types/card";
+import { Card } from "../../../types/card";
 import { Button } from "../../../components/ui/Button";
 import { Input } from "../../../components/ui/Input";
 import { getShortCardUrl } from "../../../utils/utils";
 import { useToast } from "../../../components/ui/Toast";
+import { CardStatusBadge } from "../../cards/components/CardStatus";
 
 //--------------|| Component Props Interface ||--------------//
 interface CardsTableProps {
@@ -30,6 +31,8 @@ interface CardsTableProps {
   onEditCard: (card: Card) => void;
   onShowQR: (card: Card) => void;
   onDeleteCard: (card: Card) => void;
+  /** Admin-only: returns an assigned card to the unassigned inventory. */
+  onUnassignCard?: (card: Card) => void;
   onSimulateScan: (card: Card) => void;
   onRefresh: () => void;
   role?: "admin" | "user";
@@ -47,6 +50,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
   onEditCard,
   onShowQR,
   onDeleteCard,
+  onUnassignCard,
   onSimulateScan,
   onRefresh,
   role = "admin",
@@ -72,11 +76,11 @@ export const CardsTable: React.FC<CardsTableProps> = ({
 
   return (
     <div
-      className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden"
+      className="bg-surface-850 rounded-2xl border border-border-subtle shadow-2xs overflow-hidden"
       dir="rtl"
     >
       {/*--------------|| Table Toolbar Header ||--------------*/}
-      <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 border-b border-border-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/*--------------|| Search Input ||--------------*/}
         <div className="w-full md:w-80">
           <Input
@@ -91,16 +95,16 @@ export const CardsTable: React.FC<CardsTableProps> = ({
         {/*--------------|| Filters & Action Buttons ||--------------*/}
         <div className="flex flex-wrap items-center justify-between md:justify-end gap-2">
           {/*--------------|| Filter Chips ||--------------*/}
-          <div className="inline-flex items-center gap-1 p-1 bg-slate-100/90 rounded-xl">
+          <div className="flex items-center gap-1 p-1 bg-surface-800/80 rounded-xl border border-border-subtle max-w-full overflow-x-auto">
             {filters.map((f) => (
               <button
                 type="button"
                 key={f.id}
                 onClick={() => onFilterChange(f.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all select-none ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ease-out-expo select-none whitespace-nowrap ${
                   activeFilter === f.id
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-brand text-text-inverse shadow-2xs"
+                    : "text-text-muted hover:text-text-primary hover:bg-surface-750"
                 }`}
               >
                 {f.label}
@@ -108,12 +112,12 @@ export const CardsTable: React.FC<CardsTableProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onRefresh}
               title="تحديث البيانات"
-              className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+              className="p-2 rounded-xl border border-border-subtle bg-surface-800 text-text-muted hover:text-text-primary hover:bg-surface-750 transition-colors"
             >
               <RefreshCw
                 className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
@@ -136,7 +140,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-right border-collapse">
           <thead>
-            <tr className="bg-slate-50/70 border-b border-slate-200 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+            <tr className="bg-surface-800/60 border-b border-border-subtle text-text-muted text-[11px] font-bold uppercase tracking-wider">
               <th className="py-3 px-4">معرف الكارت</th>
               <th className="py-3 px-4">الحالة</th>
               {role === "admin" && (
@@ -148,55 +152,54 @@ export const CardsTable: React.FC<CardsTableProps> = ({
               <th className="py-3 px-4 text-left">إجراءات</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border-subtle">
             {isLoading && cards.length === 0 ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={`skeleton-${i}`} className="animate-pulse">
                   <td className="py-4 px-4">
-                    <div className="h-4 w-24 bg-slate-100 rounded" />
+                    <div className="h-4 w-24 bg-surface-800 rounded" />
                   </td>
                   <td className="py-4 px-4">
-                    <div className="h-5 w-20 bg-slate-100 rounded-full" />
+                    <div className="h-5 w-20 bg-surface-800 rounded-full" />
                   </td>
                   {role === "admin" && (
                     <td className="py-4 px-4">
-                      <div className="h-4 w-28 bg-slate-100 rounded" />
+                      <div className="h-4 w-28 bg-surface-800 rounded" />
                     </td>
                   )}
                   <td className="py-4 px-4">
-                    <div className="h-4 w-32 bg-slate-100 rounded" />
+                    <div className="h-4 w-32 bg-surface-800 rounded" />
                   </td>
                   <td className="py-4 px-4">
-                    <div className="h-4 w-48 bg-slate-100 rounded" />
+                    <div className="h-4 w-48 bg-surface-800 rounded" />
                   </td>
                   <td className="py-4 px-4 text-center">
-                    <div className="h-4 w-8 bg-slate-100 rounded mx-auto" />
+                    <div className="h-4 w-8 bg-surface-800 rounded mx-auto" />
                   </td>
                   <td className="py-4 px-4 text-left">
-                    <div className="h-6 w-24 bg-slate-100 rounded ml-auto" />
+                    <div className="h-6 w-24 bg-surface-800 rounded ml-auto" />
                   </td>
                 </tr>
               ))
             ) : cards.length > 0 ? (
               cards.map((card: any) => {
-                const status = getCardStatus(card);
                 return (
                   <tr
                     key={card.card_id}
-                    className="hover:bg-slate-50/60 transition-colors"
+                    className="hover:bg-surface-800/40 transition-colors duration-150"
                   >
                     {/* Card ID */}
-                    <td className="py-4 px-4 font-mono font-bold text-slate-900 text-xs">
+                    <td className="py-4 px-4 font-mono font-bold text-text-primary text-xs">
                       <div className="flex items-center gap-2">
                         <span>{card.card_id}</span>
                         <button
                           type="button"
                           onClick={() => handleCopyLink(card.card_id)}
-                          className="p-1 rounded bg-slate-100 text-slate-500 hover:text-slate-800"
+                          className="p-1 rounded-md bg-surface-800 text-text-muted hover:text-text-primary transition-colors"
                           title="نسخ الرابط"
                         >
                           {copiedId === card.card_id ? (
-                            <Check className="w-3 h-3 text-emerald-600" />
+                            <Check className="w-3 h-3 text-status-active-icon" />
                           ) : (
                             <Copy className="w-3 h-3" />
                           )}
@@ -206,26 +209,12 @@ export const CardsTable: React.FC<CardsTableProps> = ({
 
                     {/* Status */}
                     <td className="py-4 px-4">
-                      {status === "active" && (
-                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          مُفعّل
-                        </span>
-                      )}
-                      {status === "unassigned" && (
-                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                          غير مخصص
-                        </span>
-                      )}
-                      {status === "inactive" && (
-                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                          معطل
-                        </span>
-                      )}
+                      <CardStatusBadge card={card} size="sm" />
                     </td>
 
                     {role === "admin" && (
                       <td className="py-4 px-4 text-xs">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono text-[11px]">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-status-info-bg text-status-info-text border border-status-info-border font-mono text-[11px]">
                           <User className="w-3 h-3 shrink-0" />
                           <span className="truncate max-w-[150px]">
                             {card.owner_email || card.user_id || "أدمن النظام"}
@@ -235,29 +224,28 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                     )}
 
                     {/* Client Name */}
-                    <td className="py-4 px-4 text-xs font-semibold text-slate-800">
+                    <td className="py-4 px-4 text-xs font-semibold text-text-secondary">
                       {card.client_name || "— غير مسمى —"}
                     </td>
 
                     {/* Target URL */}
-                    <td className="py-4 px-4 text-xs font-mono text-slate-600 max-w-xs truncate">
+                    <td className="py-4 px-4 text-xs font-mono text-text-muted max-w-xs truncate">
                       {card.target_url ? (
                         <a
                           href={card.target_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-blue-600 inline-flex items-center gap-1 truncate dir-ltr text-right"
+                          className="hover:text-brand transition-colors block truncate dir-ltr text-right"
                         >
                           <span className="truncate">{card.target_url}</span>
-                          <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                       ) : (
-                        <span className="text-slate-400">لا يوجد رابط</span>
+                        <span className="text-text-disabled">لا يوجد رابط</span>
                       )}
                     </td>
 
                     {/* Scan Count */}
-                    <td className="py-4 px-4 text-center font-mono text-xs font-bold text-slate-900">
+                    <td className="py-4 px-4 text-center font-mono text-xs font-bold text-text-primary">
                       {card.scan_count || 0}
                     </td>
 
@@ -267,7 +255,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                         <button
                           type="button"
                           onClick={() => onShowQR(card)}
-                          className="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors"
+                          className="p-1.5 bg-status-info-bg text-status-info-icon hover:bg-status-info-border rounded-lg transition-colors"
                           title="عرض QR Code"
                         >
                           <QrCode className="w-4 h-4" />
@@ -275,15 +263,25 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                         <button
                           type="button"
                           onClick={() => onSimulateScan(card)}
-                          className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                          className="p-1.5 bg-surface-800 text-text-muted hover:text-text-primary hover:bg-surface-750 rounded-lg transition-colors"
                           title="محاكاة مسح"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+                        {role === "admin" && card.user_id && onUnassignCard && (
+                          <button
+                            type="button"
+                            onClick={() => onUnassignCard(card)}
+                            className="p-1.5 bg-status-unassigned-bg text-status-unassigned-icon hover:bg-status-unassigned-border rounded-lg transition-colors"
+                            title="إلغاء تعيين الكارت (إرجاع للمخزون)"
+                          >
+                            <UserMinus className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => onEditCard(card)}
-                          className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                          className="p-1.5 bg-surface-800 text-text-muted hover:text-text-primary hover:bg-surface-750 rounded-lg transition-colors"
                           title="تعديل الكارت"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -291,7 +289,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                         <button
                           type="button"
                           onClick={() => onDeleteCard(card)}
-                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                          className="p-1.5 bg-status-danger-bg text-status-danger-icon hover:bg-status-danger-border rounded-lg transition-colors"
                           title="حذف الكارت"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -304,7 +302,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
             ) : (
               <tr>
                 <td colSpan={role === "admin" ? 7 : 6} className="py-12 text-center">
-                  <p className="text-base font-bold text-slate-800">
+                  <p className="text-base font-bold text-text-secondary">
                     لا توجد كروت مطابقة
                   </p>
                 </td>
@@ -315,77 +313,60 @@ export const CardsTable: React.FC<CardsTableProps> = ({
       </div>
 
       {/*--------------|| Mobile Responsive Cards View ||--------------*/}
-      <div className="block md:hidden divide-y divide-slate-100">
+      <div className="block md:hidden divide-y divide-border-subtle">
         {isLoading && cards.length === 0 ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={`m-skel-${i}`} className="p-4 space-y-3 animate-pulse">
-              <div className="h-5 w-32 bg-slate-100 rounded" />
-              <div className="h-4 w-48 bg-slate-100 rounded" />
-              <div className="h-8 w-full bg-slate-100 rounded" />
+              <div className="h-5 w-32 bg-surface-800 rounded" />
+              <div className="h-4 w-48 bg-surface-800 rounded" />
+              <div className="h-8 w-full bg-surface-800 rounded" />
             </div>
           ))
         ) : cards.length > 0 ? (
           cards.map((card: any) => {
-            const status = getCardStatus(card);
             return (
               <div
                 key={card.card_id}
-                className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition-colors"
+                className="p-4 space-y-3 hover:bg-surface-800/40 transition-colors duration-150"
               >
                 {/* Card ID & Status Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-slate-900">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-mono text-sm font-bold text-text-primary truncate">
                       {card.card_id}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleCopyLink(card.card_id)}
-                      className="p-1 rounded bg-slate-100 text-slate-500 hover:text-slate-800"
+                      className="p-1 rounded-md bg-surface-800 text-text-muted hover:text-text-primary transition-colors"
                       title="نسخ الرابط"
                     >
                       {copiedId === card.card_id ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <Check className="w-3.5 h-3.5 text-status-active-icon" />
                       ) : (
                         <Copy className="w-3.5 h-3.5" />
                       )}
                     </button>
                   </div>
-                  <div>
-                    {status === "active" && (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        مُفعّل
-                      </span>
-                    )}
-                    {status === "unassigned" && (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                        غير مخصص
-                      </span>
-                    )}
-                    {status === "inactive" && (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                        معطل
-                      </span>
-                    )}
-                  </div>
+                  <CardStatusBadge card={card} size="sm" />
                 </div>
 
                 {/* Client Details */}
-                <div className="text-xs text-slate-700">
-                  <span className="text-slate-400 block text-[11px]">
+                <div className="text-xs">
+                  <span className="text-text-muted block text-[11px]">
                     العميل المخصص:
                   </span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-text-primary">
                     {card.client_name || "— لم يُعيّن عميل بعد —"}
                   </span>
                 </div>
 
                 {role === "admin" && (
-                  <div className="text-xs text-slate-700 flex items-center justify-between bg-indigo-50/60 p-2 rounded-lg border border-indigo-100">
-                    <span className="text-slate-500 text-[11px]">
+                  <div className="text-xs flex items-center justify-between bg-status-info-bg/60 p-2 rounded-lg border border-status-info-border">
+                    <span className="text-text-muted text-[11px]">
                       مالك الكارت:
                     </span>
-                    <span className="font-mono font-semibold text-indigo-700 text-[11px] truncate max-w-[200px]">
+                    <span className="font-mono font-semibold text-status-info-text text-[11px] truncate max-w-[200px]">
                       {card.owner_email || card.user_id || "أدمن النظام"}
                     </span>
                   </div>
@@ -393,35 +374,30 @@ export const CardsTable: React.FC<CardsTableProps> = ({
 
                 {/* Redirect Target Link */}
                 {card.target_url && (
-                  <div className="flex items-center justify-between text-xs font-mono text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/80">
-                    <span className="truncate dir-ltr text-right flex-1 text-[11px]">
-                      {card.target_url}
-                    </span>
-                    <a
-                      href={card.target_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 text-blue-600 hover:text-blue-800 shrink-0 mr-1"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
+                  <a
+                    href={card.target_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs font-mono text-text-muted hover:text-brand bg-surface-800/60 p-2 rounded-lg border border-border-subtle transition-colors truncate dir-ltr text-right"
+                  >
+                    <span className="text-[11px]">{card.target_url}</span>
+                  </a>
                 )}
 
                 {/* Mobile Actions Bar */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                  <span className="text-slate-500">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border-subtle text-xs">
+                  <span className="text-text-muted shrink-0">
                     المسحات:{" "}
-                    <strong className="font-mono text-slate-900 font-bold">
+                    <strong className="font-mono text-text-primary font-bold">
                       {card.scan_count || 0}
                     </strong>
                   </span>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => onShowQR(card)}
-                      className="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg font-medium flex items-center gap-1"
+                      className="p-1.5 bg-status-info-bg text-status-info-icon hover:bg-status-info-border rounded-lg font-medium flex items-center gap-1 transition-colors"
                       title="عرض QR Code"
                     >
                       <QrCode className="w-4 h-4" />
@@ -430,23 +406,33 @@ export const CardsTable: React.FC<CardsTableProps> = ({
                     <button
                       type="button"
                       onClick={() => onSimulateScan(card)}
-                      className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg"
+                      className="p-1.5 bg-surface-800 text-text-muted hover:text-text-primary hover:bg-surface-750 rounded-lg transition-colors"
                       title="تجربة"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button
+                    {role === "admin" && card.user_id && onUnassignCard && (
+                      <button
                         type="button"
-                        onClick={() => onEditCard(card)}
-                        className="p-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg"
-                        title="تعديل"
+                        onClick={() => onUnassignCard(card)}
+                        className="p-1.5 bg-status-unassigned-bg text-status-unassigned-icon hover:bg-status-unassigned-border rounded-lg transition-colors"
+                        title="إلغاء تعيين الكارت"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <UserMinus className="w-4 h-4" />
                       </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onEditCard(card)}
+                      className="p-1.5 bg-surface-800 text-text-muted hover:text-text-primary hover:bg-surface-750 rounded-lg transition-colors"
+                      title="تعديل"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
                     <button
                       type="button"
                       onClick={() => onDeleteCard(card)}
-                      className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg"
+                      className="p-1.5 bg-status-danger-bg text-status-danger-icon hover:bg-status-danger-border rounded-lg transition-colors"
                       title="حذف"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -458,7 +444,7 @@ export const CardsTable: React.FC<CardsTableProps> = ({
           })
         ) : (
           <div className="py-10 text-center p-4">
-            <p className="text-sm font-bold text-slate-700">
+            <p className="text-sm font-bold text-text-secondary">
               لا توجد كروت حتى الآن
             </p>
           </div>

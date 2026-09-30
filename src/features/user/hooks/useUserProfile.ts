@@ -22,7 +22,7 @@ export function useUserProfile() {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, toastError]);
+  }, [user, toastError]);
 
   useEffect(() => {
     fetchProfile();

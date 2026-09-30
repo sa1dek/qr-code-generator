@@ -10,6 +10,7 @@ import { ToastProvider } from "./components/ui/Toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/auth/LoginPage";
+import { ConfirmEmailPage } from "./pages/auth/ConfirmEmailPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { UserDashboardPage } from "./pages/user/UserDashboardPage";
 import { ScanRedirectPage } from "./pages/ScanRedirectPage";
@@ -46,6 +47,7 @@ function AppRoutes() {
         element={
           <HomePage
             onGoToLogin={() => navigate("/admin/login")}
+            onGoToSignUp={() => navigate("/signup")}
             onGoToDashboard={() => {
               if (user?.role === "admin") {
                 navigate("/admin");
@@ -58,12 +60,41 @@ function AppRoutes() {
         }
       />
 
+      {/* Standalone Signup Page (deep-linked from the landing page CTA) */}
+      <Route
+        path="/signup"
+        element={
+          isAuthenticated ? (
+            <Navigate
+              to={user?.role === "admin" ? "/admin" : "/user"}
+              replace
+            />
+          ) : (
+            <LoginPage
+              initialMode="signup"
+              onLoginSuccess={(_token, loggedInUser) => {
+                if (loggedInUser.role === "admin") {
+                  navigate("/admin");
+                } else {
+                  navigate("/user");
+                }
+              }}
+              onGoHome={() => navigate("/")}
+              dbMode="supabase"
+            />
+          )
+        }
+      />
+
       {/* Login / Signup Page */}
       <Route
         path="/admin/login"
         element={
           isAuthenticated ? (
-            <Navigate to={user?.role === "admin" ? "/admin" : "/user"} replace />
+            <Navigate
+              to={user?.role === "admin" ? "/admin" : "/user"}
+              replace
+            />
           ) : (
             <LoginPage
               onLoginSuccess={(_token, loggedInUser) => {
@@ -75,6 +106,24 @@ function AppRoutes() {
               }}
               onGoHome={() => navigate("/")}
               dbMode="supabase"
+            />
+          )
+        }
+      />
+
+      {/* Post-registration e-mail confirmation notice (public) */}
+      <Route
+        path="/auth/confirm-email"
+        element={
+          isAuthenticated ? (
+            <Navigate
+              to={user?.role === "admin" ? "/admin" : "/user"}
+              replace
+            />
+          ) : (
+            <ConfirmEmailPage
+              onGoToLogin={() => navigate("/admin/login")}
+              onGoHome={() => navigate("/")}
             />
           )
         }

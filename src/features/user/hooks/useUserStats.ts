@@ -21,7 +21,7 @@ export function useUserStats() {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, toastError]);
+  }, [user, toastError]);
 
   useEffect(() => {
     fetchStats();

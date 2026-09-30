@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -33,5 +33,18 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
-  }
+  },
+  "description": "Dynamic NFC & QR review card management system with real-time redirect resolution, built with React, Tailwind CSS, and Supabase.",
+  "main": "postcss.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sa1dek/qr-code-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sa1dek/qr-code-generator/issues"
+  },
+  "homepage": "https://github.com/sa1dek/qr-code-generator#readme"
 }

@@ -7,7 +7,7 @@ import {
   logoutUser,
   getUserProfile,
 } from "../features/auth/services/authService";
-import type { LoginCredentials, SignUpCredentials } from "../features/auth/types/auth";
+import type { LoginCredentials, SignUpCredentials, SignUpResult } from "../features/auth/types/auth";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -15,10 +15,12 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  signUp: (credentials: SignUpCredentials) => Promise<void>;
+  login: (
+    credentials: LoginCredentials,
+  ) => Promise<{ user: AuthUser; token: string }>;
+  signUp: (credentials: SignUpCredentials) => Promise<SignUpResult>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<AuthUser | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const refreshUser = useCallback(async () => {
+  const refreshUser = useCallback(async (): Promise<AuthUser | null> => {
+    let resolved: AuthUser | null = null;
     try {
       const { data } = await supabase.auth.getSession();
       const session = data?.session;
@@ -66,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token: session.access_token,
         };
         syncAuthState(refreshedUser, session.access_token);
+        resolved = refreshedUser;
       } else {
         syncAuthState(null, null);
       }
@@ -74,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
+    return resolved;
   }, []);
 
   // Listen for Supabase auth events
@@ -110,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { user: loggedInUser, token } = await loginWithIdentifier(credentials);
       syncAuthState(loggedInUser, token);
+      return { user: loggedInUser, token };
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (credentials: SignUpCredentials) => {
     setIsLoading(true);
     try {
-      await signUpUser(credentials);
+      return await signUpUser(credentials);
     } finally {
       setIsLoading(false);
     }

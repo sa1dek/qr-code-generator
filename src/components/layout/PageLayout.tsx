@@ -20,7 +20,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   showHeader = true,
 }) => {
   return (
-    <div className="min-h-screen bg-[#171717] text-[#f5f5f5] flex flex-col">
+    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col overflow-x-hidden">
       {showHeader && (
         <Navbar
           currentUser={currentUser}

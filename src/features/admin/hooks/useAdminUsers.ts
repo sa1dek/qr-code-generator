@@ -1,41 +1,38 @@
 import { useState, useEffect, useCallback } from "react";
 import type { UserProfile } from "../../../types";
-import { getAllProfiles, updateUserRole } from "../services/adminService";
-import { useToast } from "../../../components/ui/Toast";
+import { getAllProfiles } from "../services/adminService";
 
+/**
+ * Single source of truth for the admin users table.
+ *
+ * Deliberately holds no mutation logic: role changes and deletions go through
+ * adminService and are followed by a refetch, so the rendered list is always the
+ * database's answer rather than an optimistic guess. Per-row pending state and
+ * toasts belong to the component that owns the interaction.
+ */
 export function useAdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { success, error: toastError } = useToast();
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  const refetch = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getAllProfiles();
-      setUsers(data);
-    } catch (err: any) {
-      toastError(err?.message || "فشل في جلب المستخدمين");
+      const { users: rows, error } = await getAllProfiles();
+      if (error) {
+        setLoadError(error);
+      } else {
+        setUsers(rows);
+        setLoadError(null);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [toastError]);
+  }, []);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    refetch();
+  }, [refetch]);
 
-  const toggleRole = async (userId: string, currentRole: "admin" | "user") => {
-    const newRole = currentRole === "admin" ? "user" : "admin";
-    const res = await updateUserRole(userId, newRole);
-    if (res.success) {
-      success("تم تحديث صلاحية المستخدم بنجاح");
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
-      );
-    } else {
-      toastError(res.error || "فشل في تحديث الصلاحية");
-    }
-  };
-
-  return { users, isLoading, refetch: fetchUsers, toggleRole };
+  return { users, isLoading, loadError, refetch };
 }

@@ -3,6 +3,8 @@ export interface Card {
   id: string;
   card_id: string;
   user_id?: string | null; 
+  /** Owner's e-mail, resolved server-side for admin views only. */
+  owner_email?: string | null;
   client_name: string | null;
   target_url: string | null;
   is_active: boolean;
