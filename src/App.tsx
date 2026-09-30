@@ -1,186 +1,126 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import { ToastProvider } from "./components/ui/Toast";
-import { HomePage } from "./components/pages/HomePage";
-import { LoginPage } from "./components/pages/LoginPage";
-import { AdminDashboardPage } from "./components/pages/AdminDashboardPage";
-import { supabase } from "./lib/fetchUtils";
-import { AuthUser } from "./types/card";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import { UserDashboardPage } from "./pages/user/UserDashboardPage";
+import { ScanRedirectPage } from "./pages/ScanRedirectPage";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 
-//--------------|| Main Application Root Component ||--------------//
+function UserDashboard() {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <UserDashboardPage
+      onLogout={async () => {
+        await logout();
+        navigate("/admin/login");
+      }}
+      dbMode="supabase"
+      currentUser={user}
+    />
+  );
+}
+
+function AppRoutes() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  return (
+    <Routes>
+      {/* Dynamic NFC/QR Code Scan Redirect */}
+      <Route path="/r/:cardId" element={<ScanRedirectPage />} />
+
+      {/* Public Home Page */}
+      <Route
+        path="/"
+        element={
+          <HomePage
+            onGoToLogin={() => navigate("/admin/login")}
+            onGoToDashboard={() => {
+              if (user?.role === "admin") {
+                navigate("/admin");
+              } else {
+                navigate("/user");
+              }
+            }}
+            isAuthenticated={isAuthenticated}
+          />
+        }
+      />
+
+      {/* Login / Signup Page */}
+      <Route
+        path="/admin/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to={user?.role === "admin" ? "/admin" : "/user"} replace />
+          ) : (
+            <LoginPage
+              onLoginSuccess={(_token, loggedInUser) => {
+                if (loggedInUser.role === "admin") {
+                  navigate("/admin");
+                } else {
+                  navigate("/user");
+                }
+              }}
+              onGoHome={() => navigate("/")}
+              dbMode="supabase"
+            />
+          )
+        }
+      />
+
+      {/* Protected Admin Dashboard */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboardPage
+              onLogout={async () => {
+                await logout();
+                navigate("/admin/login");
+              }}
+              dbMode="supabase"
+              currentUser={user}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected User Dashboard */}
+      <Route
+        path="/user/*"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 export default function App() {
-  const [currentPath, setCurrentPath] = useState<string>(() => {
-    return window.location.pathname || "/";
-  });
-
-  const [authToken, setAuthToken] = useState<string | null>(() => {
-    return localStorage.getItem("review_cards_token") || null;
-  });
-
-  // تخزين بيانات المستخدم الحالي (دور وصلاحيات)
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
-    const savedUser = localStorage.getItem("review_cards_current_user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
-  const [dbMode, setDbMode] = useState<"supabase" | "mock">("supabase");
-  const [redirecting, setRedirecting] = useState<boolean>(false);
-  const [redirectError, setRedirectError] = useState<string | null>(null);
-
-  //--------------|| Dynamic QR/NFC Redirect Handler (/r/:cardId) ||--------------//
-  useEffect(() => {
-    const path = window.location.pathname;
-    if (path.startsWith("/r/")) {
-      const cardId = path.split("/r/")[1]?.trim();
-      if (cardId) {
-        setRedirecting(true);
-
-        const handleRedirect = async () => {
-          try {
-            const { data, error } = await supabase
-              .from("cards")
-              .select("target_url, is_active, scan_count")
-              .eq("card_id", cardId)
-              .single();
-
-            if (error || !data) {
-              setRedirectError("عذراً، هذا الكارت غير موجود في النظام.");
-              setRedirecting(false);
-              return;
-            }
-
-            if (!data.is_active) {
-              setRedirectError("عذراً، هذا الكارت غير مفعل حالياً.");
-              setRedirecting(false);
-              return;
-            }
-
-            if (!data.target_url) {
-              setRedirectError("لم يتم ربط رابط توجيه لهذا الكارت بعد.");
-              setRedirecting(false);
-              return;
-            }
-
-            await supabase
-              .from("cards")
-              .update({
-                scan_count: (data.scan_count || 0) + 1,
-                last_scanned_at: new Date().toISOString(),
-              })
-              .eq("card_id", cardId);
-
-            const finalUrl =
-              data.target_url.startsWith("http://") ||
-              data.target_url.startsWith("https://")
-                ? data.target_url
-                : `https://${data.target_url}`;
-
-            window.location.href = finalUrl;
-          } catch (err) {
-            setRedirectError("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
-            setRedirecting(false);
-          }
-        };
-
-        handleRedirect();
-      }
-    }
-  }, []);
-
-  //--------------|| History PopState Listener ||--------------//
-  useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname || "/");
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  //--------------|| Navigation & Authentication Handlers ||--------------//
-  const navigateTo = (path: string) => {
-    window.history.pushState({}, "", path);
-    setCurrentPath(path);
-  };
-
-  const handleLoginSuccess = (token: string, user: AuthUser) => {
-    setAuthToken(token);
-    setCurrentUser(user);
-    localStorage.setItem("review_cards_token", token);
-    localStorage.setItem("review_cards_current_user", JSON.stringify(user));
-    navigateTo("/admin");
-  };
-
-  const handleLogout = () => {
-    setAuthToken(null);
-    setCurrentUser(null);
-    localStorage.removeItem("review_cards_token");
-    localStorage.removeItem("review_cards_current_user");
-    navigateTo("/admin/login");
-  };
-
-  const isAuthenticated = Boolean(authToken);
-
-  //--------------|| Render Dynamic Scan Redirect Screen ||--------------//
-  if (currentPath.startsWith("/r/")) {
-    return (
-      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4 dir-rtl text-center">
-        {redirectError ? (
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-2xl max-w-sm w-full space-y-4">
-            <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-              !
-            </div>
-            <h2 className="text-lg font-bold text-slate-100">تعذر التوجيه</h2>
-            <p className="text-sm text-slate-400">{redirectError}</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-sm text-slate-300 font-medium">
-              جاري توجيهك إلى صفحة التقييم...
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  //--------------|| Application Route Matching Logic ||--------------//
-  let content = null;
-
-  if (currentPath.startsWith("/admin/login")) {
-    content = (
-      <LoginPage
-        onLoginSuccess={handleLoginSuccess}
-        onGoHome={() => navigateTo("/")}
-        dbMode={dbMode}
-      />
-    );
-  } else if (currentPath.startsWith("/admin")) {
-    if (!isAuthenticated) {
-      content = (
-        <LoginPage
-          onLoginSuccess={handleLoginSuccess}
-          onGoHome={() => navigateTo("/")}
-          dbMode={dbMode}
-        />
-      );
-    } else {
-      content = (
-        <AdminDashboardPage
-          onLogout={handleLogout}
-          dbMode="supabase"
-          currentUser={currentUser}
-        />
-      );
-    }
-  } else {
-    content = (
-      <HomePage
-        onGoToLogin={() => navigateTo("/admin/login")}
-        onGoToDashboard={() => navigateTo("/admin")}
-        isAuthenticated={isAuthenticated}
-      />
-    );
-  }
-
-  return <ToastProvider>{content}</ToastProvider>;
+  return (
+    <ToastProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </ToastProvider>
+  );
 }

@@ -7,6 +7,7 @@ export interface Card {
   target_url: string | null;
   is_active: boolean;
   scan_count: number;
+  last_scanned_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -17,6 +18,7 @@ export type UserRole = "admin" | "user";
 export interface UserProfile {
   id: string;
   email: string;
+  username?: string;
   role: UserRole;
   created_at?: string;
 }
@@ -24,6 +26,7 @@ export interface UserProfile {
 export interface AuthUser {
   id: string;
   email: string;
+  username?: string;
   role: UserRole;
   token?: string;
 }
